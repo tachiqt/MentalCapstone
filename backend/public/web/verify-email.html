@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify email — SmartCare</title>
+  <link rel="icon" href="assets/favicon.png" type="image/png" sizes="32x32"> <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180"> <link rel="stylesheet" href="css/styles.css?v=20261023childui">
+  <link rel="icon" href="assets/favicon.png" type="image/png" sizes="32x32"> <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180"> <link rel="stylesheet" href="css/login.css?v=20260827r2">
+</head>
+<body class="page-auth">
+  <main class="verify-result">
+    <div class="verify-result__card">
+      <img src="assets/logo.png" alt="SmartCare" class="verify-result__logo" width="64" height="64">
+      <h1 id="verify-title">Email verification</h1>
+      <p id="verify-message" class="verify-result__copy">Processing…</p>
+      <a href="login.html" class="btn login-submit" id="verify-action" hidden>Continue with Google</a>
+    </div>
+  </main>
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const status = params.get('status') || 'invalid';
+      const email = (params.get('email') || '').trim();
+      const wantGoogle = params.get('google') === '1';
+      const title = document.getElementById('verify-title');
+      const message = document.getElementById('verify-message');
+      const action = document.getElementById('verify-action');
+      const copy = {
+        success: {
+          title: 'Email verified',
+          message: wantGoogle
+            ? 'Your new email is confirmed. Continue to sign in with the Google account for this address.'
+            : 'Your email is confirmed. You can now sign in with your credentials or Google.',
+        },
+        already: {
+          title: 'Already verified',
+          message: 'This email address was already verified. Continue to sign in with Google.',
+        },
+        expired: {
+          title: 'Link expired',
+          message: 'This verification link has expired (links are valid for 15 minutes). Open Settings and resend verification, or use Resend on the verification modal.',
+        },
+        invalid: {
+          title: 'Invalid link',
+          message: 'This verification link is not valid. Ask your Head Doctor to resend verification, or resend from Settings.',
+        },
+      };
+      const content = copy[status] || copy.invalid;
+      title.textContent = content.title;
+      message.textContent = content.message;
+      action.hidden = false;
+
+      const loginUrl = new URL('login.html', window.location.href);
+      if (status === 'success' || status === 'already') {
+        loginUrl.searchParams.set('google', '1');
+        loginUrl.searchParams.set('verified', '1');
+        if (email) loginUrl.searchParams.set('email', email);
+        action.textContent = 'Continue with Google';
+        action.href = loginUrl.pathname + loginUrl.search;
+        if (wantGoogle && (status === 'success' || status === 'already')) {
+          window.setTimeout(() => {
+            window.location.href = action.href;
+          }, 900);
+        }
+      } else {
+        action.textContent = 'Go to sign in';
+        action.href = 'login.html';
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+node_modules/
+vendor/
+migration-transfer/
+backend/vendor/
+backend/node_modules/
+backend/database/database.sqlite
+backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/bootstrap/cache/*.php
+mobile/.dart_tool/
+mobile/build/
+mobile-rn/node_modules/
+.idea/
+.vscode/
+.cursor/
+*.log
+.DS_Store
+
+# Secrets / local env (keep *.example)
+.env
+.env.*
+!.env.example
+!**/.env.example
+backend/.env
+mobile-rn/.env

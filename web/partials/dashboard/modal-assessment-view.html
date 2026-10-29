@@ -1,0 +1,20 @@
+<dialog class="modal modal--assessment" id="modal-assessment-view" aria-labelledby="modal-assessment-view-title">
+    <div class="modal__card">
+      <div class="modal__header">
+        <div>
+          <h3 id="modal-assessment-view-title">Assessment details</h3>
+          <p class="modal__subtitle" id="modal-assessment-view-meta"></p>
+        </div>
+        <button type="button" class="modal__close" data-close-modal aria-label="Close"><img src="https://api.iconify.design/lucide/x.svg?color=%235C6775" alt="" width="18" height="18"></button>
+      </div>
+      <div class="modal__body modal__body--assessment">
+        <div id="assessment-view-alert" class="alert" hidden role="alert"></div>
+        <div id="assessment-view-content" class="assessment-view"></div>
+          <div class="form-actions form-actions--end">
+          <button type="button" class="btn btn-secondary" data-close-modal>Close</button>
+          <button type="button" class="btn btn-secondary" id="assessment-view-profile-btn">Open Child Profile</button>
+          <button type="button" class="btn btn-accent" id="assessment-view-generate-btn">Generate AI recommendation</button>
+        </div>
+      </div>
+    </div>
+  </dialog>

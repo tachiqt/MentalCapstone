@@ -1,0 +1,45 @@
+# Build and deploy SmartCare to Cloud Run (asia-southeast1)
+substitutions:
+  _REGION: asia-southeast1
+  _SERVICE: smartcare
+  _REPO: smartcare
+  _SQL_INSTANCE: smartcare-mysql
+  _TAG: latest
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/app:${_TAG}
+      - ./backend
+
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/app:${_TAG}
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/app:${_TAG}
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+      - --port=8080
+      - --cpu=1
+      - --memory=1Gi
+      - --min-instances=0
+      - --max-instances=5
+      - --add-cloudsql-instances=$PROJECT_ID:${_REGION}:${_SQL_INSTANCE}
+      - --set-env-vars=APP_NAME=SmartCare,APP_ENV=production,APP_DEBUG=false,APP_URL=https://smartcare-zdi2psmkca-as.a.run.app,LOG_CHANNEL=stderr,DB_CONNECTION=mysql,DB_DATABASE=smartcare,DB_USERNAME=smartcare,DB_SOCKET=/cloudsql/$PROJECT_ID:${_REGION}:${_SQL_INSTANCE},SESSION_DRIVER=database,CACHE_STORE=database,QUEUE_CONNECTION=sync,MEDIA_DISK=gcs,AVATARS_DISK=gcs,GOOGLE_CLOUD_PROJECT_ID=$PROJECT_ID,GOOGLE_CLOUD_STORAGE_BUCKET=$PROJECT_ID-smartcare,GOOGLE_CLOUD_STORAGE_PATH_PREFIX=smartcare,ASSETS_URL=https://storage.googleapis.com/$PROJECT_ID-smartcare/smartcare/assets/web,FILESYSTEM_DISK=local,OPENAI_FAKE=false,MAIL_MAILER=smtp,MAIL_HOST=smtp.gmail.com,MAIL_PORT=587,MAIL_FROM_NAME=SmartCare,MAIL_TIMEOUT=20
+      - --set-secrets=APP_KEY=smartcare-app-key:latest,DB_PASSWORD=smartcare-db-password:latest,OPENAI_API_KEY=smartcare-openai-key:latest,GOOGLE_CLIENT_ID=smartcare-google-client-id:latest,MAIL_USERNAME=smartcare-mail-username:latest,MAIL_PASSWORD=smartcare-mail-password:latest,MAIL_FROM_ADDRESS=smartcare-mail-username:latest
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/app:${_TAG}
+
+options:
+  logging: CLOUD_LOGGING_ONLY

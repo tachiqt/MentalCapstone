@@ -1,0 +1,107 @@
+<dialog class="modal modal--medication" id="modal-medication" aria-labelledby="modal-medication-title">
+    <div class="modal__card modal__card--medication">
+      <div class="modal__header modal__header--assessment">
+        <div class="modal__header-main">
+          <span class="staff-modal-face" id="modal-medication-face">
+            <span class="staff-avatar staff-avatar--lg" id="modal-medication-avatar" hidden></span>
+            <span class="modal__header-icon" id="modal-medication-icon-wrap">
+              <img id="modal-medication-icon" src="https://api.iconify.design/lucide/pill.svg?color=%230F3D30" alt="" width="22" height="22">
+            </span>
+          </span>
+          <div>
+            <h3 id="modal-medication-title">Add schedule</h3>
+            <p class="modal__subtitle" id="modal-medication-subtitle">Create a medication plan caretakers administer.</p>
+          </div>
+        </div>
+        <button type="button" class="modal__close modal__close--round" data-close-modal aria-label="Close">
+          <img src="https://api.iconify.design/lucide/x.svg?color=%235C6775" alt="" width="18" height="18">
+        </button>
+      </div>
+
+      <div class="modal__body modal__body--therapy">
+        <div id="medication-modal-alert" class="alert" hidden role="alert"></div>
+
+        <form id="medication-panel-form" class="medication-modal-panel" hidden>
+          <input type="hidden" id="medication-schedule-id" value="">
+          <div class="medication-form-layout">
+            <section class="therapy-block">
+              <h4 class="therapy-block__title">Child and medicine</h4>
+              <div class="form-group">
+                <label for="medication-child">Assigned child</label>
+                <select id="medication-child" class="field-control" required>
+                  <option value="">Select a child…</option>
+                </select>
+              </div>
+              <div class="therapy-grid">
+                <div class="form-group">
+                  <label for="medication-name">Medicine name</label>
+                  <input type="text" id="medication-name" class="field-control" maxlength="255" required placeholder="e.g. Melatonin">
+                </div>
+                <div class="form-group">
+                  <label for="medication-dosage">Dosage</label>
+                  <input type="text" id="medication-dosage" class="field-control" maxlength="255" placeholder="e.g. 3mg">
+                </div>
+              </div>
+            </section>
+            <section class="therapy-block">
+              <h4 class="therapy-block__title">Timing</h4>
+              <div class="form-group">
+                <label id="medication-doses-label">Times per day</label>
+                <div class="therapy-pills" role="group" aria-labelledby="medication-doses-label" id="medication-doses">
+                  <button type="button" data-doses="1" class="is-active">Once</button>
+                  <button type="button" data-doses="2">Twice</button>
+                  <button type="button" data-doses="3">3 times</button>
+                  <button type="button" data-doses="4">4 times</button>
+                </div>
+              </div>
+              <div class="medication-times-grid" id="medication-times"></div>
+              <fieldset class="form-group">
+                <legend>Days of week</legend>
+                <div class="therapy-days" id="medication-days">
+                  <label><input type="checkbox" value="0" checked> Sun</label>
+                  <label><input type="checkbox" value="1" checked> Mon</label>
+                  <label><input type="checkbox" value="2" checked> Tue</label>
+                  <label><input type="checkbox" value="3" checked> Wed</label>
+                  <label><input type="checkbox" value="4" checked> Thu</label>
+                  <label><input type="checkbox" value="5" checked> Fri</label>
+                  <label><input type="checkbox" value="6" checked> Sat</label>
+                </div>
+              </fieldset>
+            </section>
+          </div>
+          <section class="therapy-block">
+            <h4 class="therapy-block__title">Instructions</h4>
+            <div class="form-group">
+              <label for="medication-instructions">How to give</label>
+              <textarea id="medication-instructions" class="field-control" rows="3" maxlength="255" placeholder="e.g. Give at bedtime with water"></textarea>
+            </div>
+          </section>
+        </form>
+
+        <div id="medication-panel-view" class="medication-modal-panel" hidden>
+          <div class="therapy-hero" id="medication-view-hero"></div>
+          <div class="medication-view-split">
+            <div class="medication-view-main">
+              <div class="therapy-facts" id="medication-detail-list"></div>
+              <div class="therapy-notes" id="medication-view-notes"></div>
+            </div>
+            <section class="therapy-block">
+              <h4 class="therapy-block__title">Recent logs</h4>
+              <p class="form-hint" id="medication-logs-empty" hidden>No administration logs yet. Caretakers record given, missed, or refused doses on mobile.</p>
+              <div class="therapy-slot-list" id="medication-logs-list"></div>
+            </section>
+          </div>
+        </div>
+
+        <div id="medication-panel-access" class="medication-modal-panel therapy-confirm" hidden>
+          <p class="therapy-confirm__copy" id="medication-access-copy">Deactivate this schedule?</p>
+          <p class="therapy-confirm__hint" id="medication-access-hint">Caretakers will no longer see it in today’s doses.</p>
+        </div>
+      </div>
+
+      <div class="modal__footer modal__footer--assessment">
+        <button type="button" class="btn btn-secondary" id="medication-modal-dismiss" data-close-modal>Cancel</button>
+        <div class="modal__footer-end" id="medication-modal-actions"></div>
+      </div>
+    </div>
+  </dialog>

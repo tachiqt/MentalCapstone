@@ -1,0 +1,40 @@
+<section id="section-notifications" class="section-panel" aria-labelledby="notifications-heading" data-web-roles="head_doctor,psychometrician">
+  <div class="section-header section-header--rich">
+    <div>
+      <p class="section-eyebrow">Activity</p>
+      <h2 id="notifications-heading">Notifications</h2>
+      <p id="notifications-page-subtitle">Record changes, successful saves, and due therapy or medication reminders.</p>
+    </div>
+    <div class="section-header__aside">
+      <button type="button" class="btn btn-secondary" id="notifications-page-mark-all" hidden>Mark all read</button>
+    </div>
+  </div>
+
+  <div class="panel notify-page-panel">
+    <div class="notify-page-toolbar">
+      <div class="notify-page-filters" role="tablist" aria-label="Filter notifications">
+        <button type="button" class="notify-page-filter is-active" data-filter="all" role="tab" aria-selected="true">All</button>
+        <button type="button" class="notify-page-filter" data-filter="unread" role="tab" aria-selected="false">Unread</button>
+      </div>
+      <p class="notify-page-count" id="notifications-page-count" aria-live="polite"></p>
+    </div>
+
+    <div class="notify-page-body">
+      <div id="notifications-page-loading" class="loading notify-page-loading">Loading notifications…</div>
+
+      <div id="notifications-page-empty" class="notify-empty notify-empty--page" hidden>
+        <img src="https://api.iconify.design/lucide/bell-off.svg?color=%235C6775" alt="" width="36" height="36">
+        <strong id="notifications-page-empty-title">All caught up</strong>
+        <p id="notifications-page-empty-copy">New activity from your workspace will appear here.</p>
+      </div>
+
+      <div id="notifications-page-list" class="notify-page-list" hidden role="list"></div>
+
+      <nav class="list-pagination" id="notifications-page-pagination" hidden aria-label="Notifications pagination">
+        <button type="button" class="btn btn-secondary btn-sm" id="notifications-page-prev">Previous</button>
+        <p class="list-pagination__meta" id="notifications-page-meta">Page 1</p>
+        <button type="button" class="btn btn-secondary btn-sm" id="notifications-page-next">Next</button>
+      </nav>
+    </div>
+  </div>
+</section>

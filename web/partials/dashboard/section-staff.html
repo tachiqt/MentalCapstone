@@ -1,0 +1,76 @@
+<section id="section-staff" class="section-panel" data-web-roles="head_doctor" aria-labelledby="staff-heading">
+          <h2 id="staff-heading" class="visually-hidden">Staff Directory</h2>
+
+          <div class="panel library-panel staff-panel">
+            <div class="panel-toolbar panel-toolbar--library">
+              <div class="panel-toolbar__start">
+                <span class="panel-toolbar__icon" aria-hidden="true">
+                  <img src="https://api.iconify.design/lucide/users-round.svg?color=%230F4C4A" alt="" width="20" height="20">
+                </span>
+                <div>
+                  <h3 class="panel-title" id="staff-directory-heading">Facility accounts</h3>
+                  <p class="panel-toolbar__hint" id="staff-summary-line">Create accounts, assign roles, and manage access</p>
+                </div>
+              </div>
+              <div class="panel-toolbar__end staff-toolbar-actions">
+                <button type="button" class="btn btn-primary" id="staff-create-btn">Create account</button>
+                <span class="count-chip" id="staff-toolbar-count">0</span>
+              </div>
+            </div>
+            <div class="filter-bar staff-filters">
+              <label class="search-field" for="staff-search">
+                <span class="visually-hidden">Search staff</span>
+                <input type="search" id="staff-search" class="field-control field-control--search" placeholder="Search name, email, or username…">
+              </label>
+              <select class="field-control" id="staff-role-filter" aria-label="Filter by role">
+                <option value="">All roles</option>
+                <option value="head_doctor">Head Doctor</option>
+                <option value="psychometrician">Psychometrician</option>
+                <option value="teacher">Teacher</option>
+                <option value="caretaker">Caretaker</option>
+                <option value="parent">Parent</option>
+              </select>
+              <select class="field-control" id="staff-status-filter" aria-label="Filter by status">
+                <option value="">All statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="new">New (7 days)</option>
+              </select>
+            </div>
+            <div id="staff-loading" class="loading">Loading staff…</div>
+            <div id="staff-empty" class="empty-state" hidden>
+              <h3>No staff loaded</h3>
+              <p>Head Doctors can create accounts and assign roles here.</p>
+            </div>
+            <div class="data-table-wrap staff-table-wrap" id="staff-table-wrap" hidden>
+              <table class="staff-table" aria-label="Staff directory">
+                <thead>
+                  <tr>
+                    <th>Person</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Registered</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="staff-tbody"></tbody>
+              </table>
+            </div>
+            <nav class="list-pagination" id="staff-pagination" hidden aria-label="Staff directory pagination">
+              <button type="button" class="btn btn-secondary btn-sm" id="staff-page-prev">Previous</button>
+              <p class="list-pagination__meta" id="staff-page-meta">Page 1</p>
+              <button type="button" class="btn btn-secondary btn-sm" id="staff-page-next">Next</button>
+            </nav>
+            <div class="staff-activity-panel" id="staff-activity-panel" hidden>
+              <table class="staff-table staff-table--activity" aria-label="Recent staff actions">
+                <thead>
+                  <tr>
+                    <th>Recent action</th>
+                    <th>When</th>
+                  </tr>
+                </thead>
+                <tbody id="staff-activity"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>

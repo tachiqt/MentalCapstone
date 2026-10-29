@@ -1,0 +1,151 @@
+<section id="section-dashboard" class="section-panel" aria-labelledby="dashboard-heading" data-web-roles="head_doctor,psychometrician">
+          <h2 id="dashboard-heading" class="visually-hidden">Care overview</h2>
+
+          <div id="analytics-loading" class="panel analytics-loading">Loading facility overview…</div>
+          <div id="analytics-error" class="panel alert alert-error" hidden role="alert"></div>
+
+          <div id="analytics-root" class="overview" hidden>
+            <article class="care-hero" id="overview-hero"></article>
+
+            <div class="kpi-grid kpi-grid--overview" id="kpi-grid"></div>
+
+            <div class="overview-layout" id="overview-layout-head">
+              <div class="overview-main">
+                <div class="panel care-activity" id="chart-sessions" role="img" aria-label="Session health"></div>
+
+                <div class="panel care-calendar">
+                  <div class="care-calendar__head">
+                    <h3 class="panel-title">Upcoming sessions</h3>
+                    <button type="button" class="btn btn-secondary btn-sm" id="overview-view-sessions" data-goto="therapy">
+                      See all sessions
+                      <img src="https://api.iconify.design/lucide/arrow-up-right.svg?color=%230F4C4A" alt="" width="14" height="14">
+                    </button>
+                  </div>
+                  <div id="overview-sessions-loading" class="loading">Loading sessions…</div>
+                  <div id="overview-sessions-empty" class="empty-state care-empty" hidden>
+                    <img src="https://api.iconify.design/lucide/calendar-days.svg?color=%230F4C4A" alt="" width="28" height="28">
+                    <h3>No upcoming sessions</h3>
+                    <p>Scheduled therapy sessions will appear here.</p>
+                    <button type="button" class="btn btn-primary btn-sm" id="overview-empty-schedule" data-goto="therapy" data-open="therapy-schedule">Schedule a session</button>
+                  </div>
+                  <div class="data-table-wrap" id="overview-sessions-wrap" hidden>
+                    <table class="data-table care-calendar__table" aria-label="Upcoming therapy sessions">
+                      <thead>
+                        <tr>
+                          <th>Child</th>
+                          <th>Time</th>
+                          <th>Specialist</th>
+                          <th><span class="visually-hidden">Open</span></th>
+                        </tr>
+                      </thead>
+                      <tbody id="overview-sessions-tbody"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <aside class="overview-aside" aria-label="Priority queue">
+                <div class="panel priority-panel">
+                  <div class="priority-panel__head">
+                    <div class="priority-panel__title-row">
+                      <span class="priority-panel__icon" aria-hidden="true">
+                        <img src="https://api.iconify.design/lucide/list-checks.svg?color=%230F4C4A" alt="" width="18" height="18">
+                      </span>
+                      <h3 class="panel-title">Priority queue</h3>
+                    </div>
+                    <span class="priority-count is-quiet" id="priority-count">0 open</span>
+                  </div>
+                  <div class="priority-feed" id="attention-list"></div>
+                  <button type="button" class="btn btn-primary btn-sm priority-panel__cta" id="priority-cta" data-goto="assessments">
+                    Review items
+                    <img src="https://api.iconify.design/lucide/arrow-right.svg?color=%23FFFFFF" alt="" width="14" height="14">
+                  </button>
+                </div>
+                <div class="panel reporting-card">
+                  <div class="reporting-card__head">
+                    <span class="reporting-card__icon" aria-hidden="true">
+                      <img src="https://api.iconify.design/lucide/file-bar-chart.svg?color=%23FFFFFF" alt="" width="20" height="20">
+                    </span>
+                    <div>
+                      <h3 class="panel-title">Weekly brief</h3>
+                      <p class="reporting-card__eyebrow">Facility report</p>
+                    </div>
+                  </div>
+                  <p class="reporting-card__copy">Share activity and review progress in one orderly export for your care team.</p>
+                  <button type="button" class="btn btn-secondary reporting-card__action" id="export-report-btn" data-goto="reports">
+                    <img src="https://api.iconify.design/lucide/download.svg?color=%230F4C4A" alt="" width="16" height="16">
+                    Export brief
+                  </button>
+                </div>
+              </aside>
+            </div>
+
+            <div class="overview-layout overview-layout--psycho is-layout-hidden" id="overview-layout-psycho">
+              <div class="overview-main">
+                <div class="panel psycho-workflow">
+                  <div class="psycho-workflow__head">
+                    <h3 class="panel-title">Assessment workflow</h3>
+                    <p class="form-hint">Select a child, score the checklist, set severity, then request an AI recommendation for teacher review.</p>
+                  </div>
+                  <ol class="psycho-workflow__steps" aria-label="Assessment steps">
+                    <li><span>1</span><div><strong>Select child</strong><small>From the children registry</small></div></li>
+                    <li><span>2</span><div><strong>Score checklist</strong><small>Rate each item 0–3</small></div></li>
+                    <li><span>3</span><div><strong>Generate AI</strong><small>Teacher reviews the draft</small></div></li>
+                  </ol>
+                  <div class="psycho-workflow__actions">
+                    <button type="button" class="btn btn-primary" id="psycho-start-assessment" data-goto="assessments" data-open="assessment">Start assessment</button>
+                    <button type="button" class="btn btn-secondary" data-goto="children">Open children</button>
+                    <button type="button" class="btn btn-secondary" data-goto="checklists">Browse checklists</button>
+                  </div>
+                </div>
+
+                <div class="panel psycho-recent">
+                  <div class="psycho-recent__head">
+                    <h3 class="panel-title">Recent submissions</h3>
+                    <button type="button" class="btn-text" data-goto="assessments">View all</button>
+                  </div>
+                  <div id="psycho-recent-loading" class="loading">Loading your assessments…</div>
+                  <div id="psycho-recent-empty" class="empty-state psycho-recent__empty" hidden>
+                    <img src="https://api.iconify.design/lucide/clipboard-list.svg?color=%230F4C4A" alt="" width="28" height="28">
+                    <h3>No assessments yet</h3>
+                    <p>Your submitted assessments will appear here with AI status.</p>
+                    <button type="button" class="btn btn-primary btn-sm" data-goto="assessments" data-open="assessment">Start first assessment</button>
+                  </div>
+                  <ul class="psycho-recent__list" id="psycho-recent-list" hidden></ul>
+                </div>
+              </div>
+
+              <aside class="overview-aside" aria-label="Psychometrician shortcuts">
+                <div class="panel psycho-next">
+                  <div class="psycho-next__head">
+                    <h3 class="panel-title">Next actions</h3>
+                    <span class="psycho-next__count" id="psycho-next-count">0</span>
+                  </div>
+                  <div class="psycho-next__feed" id="psycho-next-actions"></div>
+                </div>
+                <div class="panel psycho-shortcuts">
+                  <h3 class="panel-title">Quick links</h3>
+                  <div class="psycho-shortcuts__grid">
+                    <button type="button" class="psycho-shortcut" data-goto="children">
+                      <img src="https://api.iconify.design/lucide/users.svg?color=%230F4C4A" alt="" width="18" height="18">
+                      <span>Children registry</span>
+                    </button>
+                    <button type="button" class="psycho-shortcut" data-goto="assessments">
+                      <img src="https://api.iconify.design/lucide/clipboard-check.svg?color=%230F4C4A" alt="" width="18" height="18">
+                      <span>My assessments</span>
+                    </button>
+                    <button type="button" class="psycho-shortcut" data-goto="reports">
+                      <img src="https://api.iconify.design/lucide/file-text.svg?color=%230F4C4A" alt="" width="18" height="18">
+                      <span>Child reports</span>
+                    </button>
+                  </div>
+                </div>
+              </aside>
+            </div>
+
+            <div class="care-continuity care-continuity--psycho" aria-label="Care record continuity">
+              <p id="care-continuity-copy">Assessment scores and AI recommendations stay linked to each child record.</p>
+              <button type="button" class="btn btn-secondary btn-sm care-continuity__cta" id="overview-explore" data-goto="children">Open children registry</button>
+            </div>
+          </div>
+        </section>

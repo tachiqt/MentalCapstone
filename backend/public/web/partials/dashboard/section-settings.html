@@ -1,0 +1,238 @@
+<section id="section-settings" class="section-panel" aria-labelledby="settings-heading" data-web-roles="head_doctor,psychometrician">
+          <h2 id="settings-heading" class="visually-hidden">Settings</h2>
+
+          <div class="settings-page">
+            <header class="settings-hero">
+              <div class="settings-hero__copy">
+                <p class="settings-hero__eyebrow">Account & facility</p>
+                <h3 class="settings-hero__title">Settings</h3>
+                <p class="settings-hero__lead">Manage your profile, security, alerts, and facility defaults in one place.</p>
+              </div>
+              <div class="settings-hero__badge" aria-hidden="true">
+                <img src="https://api.iconify.design/lucide/settings-2.svg?color=%230F4C4A" alt="" width="28" height="28">
+              </div>
+            </header>
+
+            <div id="settings-alert" class="alert" hidden role="alert"></div>
+
+            <div class="settings-layout">
+              <div class="settings-layout__main">
+                <article class="panel settings-card" aria-labelledby="settings-profile-title">
+                  <header class="settings-card__head">
+                    <span class="settings-card__icon" aria-hidden="true">
+                      <img src="https://api.iconify.design/lucide/user-round.svg?color=%230F4C4A" alt="" width="18" height="18">
+                    </span>
+                    <div>
+                      <h3 id="settings-profile-title">Profile</h3>
+                      <p>Your name and contact details used across SmartCare.</p>
+                    </div>
+                  </header>
+                  <form id="settings-profile-form" class="settings-form">
+                    <div class="settings-avatar" id="settings-avatar-block">
+                      <div class="settings-avatar__preview" id="settings-avatar-preview" aria-hidden="true"></div>
+                      <div class="settings-avatar__copy">
+                        <strong>Profile photo</strong>
+                        <p>Upload a clear headshot. JPG, PNG, or WebP up to 5 MB.</p>
+                        <div class="settings-avatar__actions">
+                          <label class="btn btn-secondary btn-sm" for="settings-avatar-input">
+                            Upload photo
+                            <input type="file" id="settings-avatar-input" accept="image/jpeg,image/png,image/webp" hidden>
+                          </label>
+                          <button type="button" class="btn btn-secondary btn-sm" id="settings-avatar-remove" hidden>Remove</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="settings-form__grid">
+                      <div class="form-group">
+                        <label for="settings-name">Full name</label>
+                        <input id="settings-name" class="field-control" required minlength="2" autocomplete="name" placeholder="e.g. Dr. Ana Reyes">
+                      </div>
+                      <div class="form-group">
+                        <label for="settings-username">Username</label>
+                        <input id="settings-username" class="field-control" required minlength="3" autocomplete="username" placeholder="Unique login name">
+                      </div>
+                      <div class="form-group">
+                        <label for="settings-email">Email</label>
+                        <input id="settings-email" type="email" class="field-control" required autocomplete="email" placeholder="you@facility.org">
+                      </div>
+                      <div class="form-group">
+                        <label for="settings-phone">Phone <span class="settings-optional">Optional</span></label>
+                        <input id="settings-phone" class="field-control" autocomplete="tel" placeholder="+63…">
+                      </div>
+                    </div>
+                    <div class="settings-form__footer">
+                      <button type="submit" class="btn btn-primary">Save profile</button>
+                    </div>
+                  </form>
+                </article>
+
+                <article class="panel settings-card" aria-labelledby="settings-security-title">
+                  <header class="settings-card__head">
+                    <span class="settings-card__icon" aria-hidden="true">
+                      <img src="https://api.iconify.design/lucide/key-round.svg?color=%230F4C4A" alt="" width="18" height="18">
+                    </span>
+                    <div>
+                      <h3 id="settings-security-title">Password</h3>
+                      <p>Use at least 8 characters. You’ll stay signed in on this device.</p>
+                    </div>
+                  </header>
+                  <form id="settings-password-form" class="settings-form">
+                    <div class="settings-form__grid settings-form__grid--security">
+                      <div class="form-group settings-form__span-2">
+                        <label for="settings-current-password">Current password</label>
+                        <input id="settings-current-password" type="password" class="field-control" required autocomplete="current-password" placeholder="Enter current password">
+                      </div>
+                      <div class="form-group">
+                        <label for="settings-new-password">New password</label>
+                        <input id="settings-new-password" type="password" class="field-control" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters">
+                      </div>
+                      <div class="form-group">
+                        <label for="settings-new-password-confirm">Confirm password</label>
+                        <input id="settings-new-password-confirm" type="password" class="field-control" required minlength="8" autocomplete="new-password" placeholder="Repeat new password">
+                      </div>
+                    </div>
+                    <div class="settings-form__footer">
+                      <button type="submit" class="btn btn-primary">Update password</button>
+                    </div>
+                  </form>
+                </article>
+
+                <article class="panel settings-card" id="settings-workspace-card" aria-labelledby="settings-workspace-title">
+                  <header class="settings-card__head">
+                    <span class="settings-card__icon" aria-hidden="true">
+                      <img src="https://api.iconify.design/lucide/building-2.svg?color=%230F4C4A" alt="" width="18" height="18">
+                    </span>
+                    <div>
+                      <h3 id="settings-workspace-title">Facility configuration</h3>
+                      <p>Head Doctor workspace defaults. Psychometricians can view these values.</p>
+                    </div>
+                  </header>
+                  <form id="settings-workspace-form" class="settings-form">
+                    <div class="settings-form__grid">
+                      <div class="form-group settings-form__span-2">
+                        <label for="settings-facility">Facility name</label>
+                        <input id="settings-facility" class="field-control" required minlength="2" placeholder="Facility display name">
+                      </div>
+                      <div class="form-group">
+                        <label for="settings-timezone">Timezone</label>
+                        <select id="settings-timezone" class="field-control">
+                          <option value="Asia/Manila">Asia/Manila</option>
+                          <option value="Asia/Singapore">Asia/Singapore</option>
+                          <option value="Asia/Tokyo">Asia/Tokyo</option>
+                          <option value="UTC">UTC</option>
+                          <option value="Australia/Sydney">Australia/Sydney</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label for="settings-session-minutes">Default session (min)</label>
+                        <input id="settings-session-minutes" type="number" class="field-control" min="15" max="480" step="5" required>
+                      </div>
+                      <div class="form-group">
+                        <label for="settings-reminder-lead">Reminder lead (min)</label>
+                        <input id="settings-reminder-lead" type="number" class="field-control" min="0" max="180" step="5" required>
+                      </div>
+                    </div>
+                    <div class="settings-form__footer">
+                      <button type="submit" class="btn btn-primary" id="settings-workspace-save">Save facility settings</button>
+                    </div>
+                  </form>
+                </article>
+              </div>
+
+              <aside class="settings-layout__aside">
+                <article class="panel settings-card" aria-labelledby="settings-alerts-title">
+                  <header class="settings-card__head">
+                    <span class="settings-card__icon" aria-hidden="true">
+                      <img src="https://api.iconify.design/lucide/bell-ring.svg?color=%230F4C4A" alt="" width="18" height="18">
+                    </span>
+                    <div>
+                      <h3 id="settings-alerts-title">Alerts & display</h3>
+                      <p>Choose theme, notifications, and navigation layout.</p>
+                    </div>
+                  </header>
+                  <form id="settings-prefs-form" class="settings-form">
+                    <div class="settings-theme" role="group" aria-labelledby="settings-theme-label">
+                      <div class="settings-theme__label" id="settings-theme-label">
+                        <strong>Appearance</strong>
+                        <small>Light is the default. Dark softens surfaces for low-light use.</small>
+                      </div>
+                      <div class="settings-theme__options">
+                        <label class="settings-theme__option" for="settings-theme-light">
+                          <input type="radio" name="settings-theme" id="settings-theme-light" value="light" checked>
+                          <span class="settings-theme__swatch settings-theme__swatch--light" aria-hidden="true"></span>
+                          Light
+                        </label>
+                        <label class="settings-theme__option" for="settings-theme-dark">
+                          <input type="radio" name="settings-theme" id="settings-theme-dark" value="dark">
+                          <span class="settings-theme__swatch settings-theme__swatch--dark" aria-hidden="true"></span>
+                          Dark
+                        </label>
+                      </div>
+                    </div>
+                    <div class="settings-toggles">
+                      <label class="settings-toggle">
+                        <span class="settings-toggle__copy">
+                          <strong>Record changes</strong>
+                          <small>Add, update, delete, and successful saves</small>
+                        </span>
+                        <input type="checkbox" id="settings-notify-records" checked>
+                        <span class="settings-switch" aria-hidden="true"></span>
+                      </label>
+                      <label class="settings-toggle">
+                        <span class="settings-toggle__copy">
+                          <strong>Due schedules</strong>
+                          <small>Therapy and medication reminders</small>
+                        </span>
+                        <input type="checkbox" id="settings-notify-schedules" checked>
+                        <span class="settings-switch" aria-hidden="true"></span>
+                      </label>
+                      <label class="settings-toggle">
+                        <span class="settings-toggle__copy">
+                          <strong>Compact navigation</strong>
+                          <small>Keep the side menu collapsed</small>
+                        </span>
+                        <input type="checkbox" id="settings-compact-nav">
+                        <span class="settings-switch" aria-hidden="true"></span>
+                      </label>
+                    </div>
+                    <div class="settings-form__footer">
+                      <button type="submit" class="btn btn-primary">Save preferences</button>
+                    </div>
+                  </form>
+                </article>
+
+                <article class="panel settings-card settings-card--devices" aria-labelledby="settings-devices-title">
+                  <header class="settings-card__head">
+                    <span class="settings-card__icon" aria-hidden="true">
+                      <img src="https://api.iconify.design/lucide/monitor-smartphone.svg?color=%230F4C4A" alt="" width="18" height="18">
+                    </span>
+                    <div>
+                      <h3 id="settings-devices-title">Devices</h3>
+                      <p>Sign out other browsers using your account. This session stays open.</p>
+                    </div>
+                  </header>
+                  <button type="button" class="btn btn-secondary" id="settings-logout-others">Sign out other devices</button>
+                </article>
+              </aside>
+            </div>
+          </div>
+
+          <dialog class="verify-modal" id="settings-verify-modal" aria-labelledby="settings-verify-title">
+            <form method="dialog" class="verify-modal__card">
+              <div class="verify-modal__icon" aria-hidden="true">
+                <img src="https://api.iconify.design/lucide/mail-check.svg?color=%230F4C4A" alt="" width="28" height="28">
+              </div>
+              <h3 id="settings-verify-title">Verify your new email</h3>
+              <p class="verify-modal__copy" id="settings-verify-copy">
+                We sent a verification link to your new address. It is valid for <strong>15 minutes</strong>.
+              </p>
+              <p class="verify-modal__email" id="settings-verify-email"></p>
+              <p class="verify-modal__status" id="settings-verify-status" hidden role="status"></p>
+              <div class="verify-modal__actions">
+                <button type="button" class="btn btn-secondary" id="settings-verify-resend">Resend link</button>
+                <button type="submit" class="btn btn-secondary" value="close">Close</button>
+              </div>
+              <button type="submit" class="verify-modal__close" value="close" aria-label="Close">×</button>
+            </form>
+          </dialog>
+        </section>

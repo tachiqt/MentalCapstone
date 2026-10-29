@@ -1,0 +1,218 @@
+<section id="section-help" class="section-panel" aria-labelledby="help-heading" data-web-roles="head_doctor,psychometrician">
+          <h2 id="help-heading" class="visually-hidden">Help</h2>
+
+          <article class="panel help-manual" aria-label="SmartCare staff manual">
+            <header class="help-manual__hero">
+              <div class="help-manual__hero-copy">
+                <p class="help-manual__eyebrow">Staff manual</p>
+                <h3 class="help-manual__title">How to use SmartCare</h3>
+                <p class="help-manual__lead">
+                  A complete guide for Head Doctors and Psychometricians on the web dashboard.
+                  Teachers, caretakers, and parents work in the mobile app.
+                </p>
+              </div>
+              <div class="help-manual__hero-meta" aria-hidden="true">
+                <span class="help-manual__chip">Web dashboard</span>
+                <span class="help-manual__chip">Green clinical UI</span>
+                <span class="help-manual__chip">Role-aware</span>
+              </div>
+            </header>
+
+            <nav class="help-manual__toc" aria-label="Manual contents">
+              <a href="#help-start" class="help-toc-link is-active" data-help-section="help-start">1. Getting started</a>
+              <a href="#help-search" class="help-toc-link" data-help-section="help-search">2. Search &amp; alerts</a>
+              <a href="#help-children" class="help-toc-link" data-help-section="help-children">3. Children</a>
+              <a href="#help-clinical" class="help-toc-link" data-help-section="help-clinical">4. Assessments</a>
+              <a href="#help-therapy" class="help-toc-link" data-help-section="help-therapy" data-help-roles="head_doctor">5. Therapy &amp; meds</a>
+              <a href="#help-reports" class="help-toc-link" data-help-section="help-reports" data-help-roles="head_doctor">6. Reports &amp; staff</a>
+              <a href="#help-roles" class="help-toc-link" data-help-section="help-roles">7. Roles &amp; apps</a>
+              <a href="#help-tips" class="help-toc-link" data-help-section="help-tips">8. Tips &amp; safety</a>
+            </nav>
+
+            <div class="help-manual__body">
+              <section class="help-chapter" id="help-start">
+                <header class="help-chapter__head">
+                  <span class="help-chapter__num">01</span>
+                  <div>
+                    <h4>Getting started</h4>
+                    <p>Sign in, navigate the workspace, and open Settings.</p>
+                  </div>
+                </header>
+                <div class="help-chapter__content">
+                  <p>Use the username and password created by your Head Doctor. After email verification (when required), you land on <strong>Care overview</strong>.</p>
+                  <ul>
+                    <li>The <strong>left sidebar</strong> opens each workspace: Overview, Children, Assessments, Checklists, and more based on your role.</li>
+                    <li>Collapse the sidebar anytime if you need a wider layout. Compact navigation can also be saved in Settings.</li>
+                    <li>Your name in the top-right opens <strong>Settings</strong> for profile, password, alerts, and (for Head Doctors) facility defaults.</li>
+                    <li>On Overview, the <strong>Priority queue</strong> highlights items that need review, and <strong>Weekly brief</strong> jumps to exportable reports.</li>
+                  </ul>
+                  <div class="help-callout">
+                    <strong>Tip:</strong> If login is blocked, verify your email first or ask the Head Doctor to resend the verification message from Staff.
+                  </div>
+                </div>
+              </section>
+
+              <section class="help-chapter" id="help-search">
+                <header class="help-chapter__head">
+                  <span class="help-chapter__num">02</span>
+                  <div>
+                    <h4>Search and notifications</h4>
+                    <p>Find records quickly and stay on top of live activity.</p>
+                  </div>
+                </header>
+                <div class="help-chapter__content">
+                  <p>The top search bar finds children, therapy sessions, and (for Head Doctors) staff accounts.</p>
+                  <ul>
+                    <li>Type at least <strong>two letters</strong>, then open a result to jump straight into that record.</li>
+                    <li>Click the <strong>bell</strong> to open notifications. The panel stays closed until you open it.</li>
+                    <li>Notifications cover record changes, successful saves, due therapy sessions, and medication times of day.</li>
+                    <li>In Settings → Alerts, you can turn record-change and schedule reminders on or off.</li>
+                  </ul>
+                  <div class="help-callout help-callout--soft">
+                    <strong>Note:</strong> Schedule reminders fire when a session or medication window is due, so keep timezone and reminder lead minutes correct in Facility configuration.
+                  </div>
+                </div>
+              </section>
+
+              <section class="help-chapter" id="help-children">
+                <header class="help-chapter__head">
+                  <span class="help-chapter__num">03</span>
+                  <div>
+                    <h4>Children registry</h4>
+                    <p>Register profiles and review the full care record.</p>
+                  </div>
+                </header>
+                <div class="help-chapter__content">
+                  <p>Children are the center of SmartCare. Every assessment, recommendation, therapy plan, and medication schedule links back to a child profile.</p>
+                  <ul>
+                    <li>Register a child with name, optional diagnosis/notes, age details, and active status.</li>
+                    <li>Open a profile to review assessments, AI recommendations, assigned staff, and related history.</li>
+                    <li>Keep inactive profiles marked clearly so Overview priority items and reports stay accurate.</li>
+                    <li>Psychometricians use the registry to pick the right child before scoring a checklist.</li>
+                  </ul>
+                </div>
+              </section>
+
+              <section class="help-chapter" id="help-clinical">
+                <header class="help-chapter__head">
+                  <span class="help-chapter__num">04</span>
+                  <div>
+                    <h4>Checklists and assessments</h4>
+                    <p>Score carefully, generate AI drafts, and require human review.</p>
+                  </div>
+                </header>
+                <div class="help-chapter__content">
+                  <p>Clinical workflow is split by role so scoring and planning stay accountable.</p>
+                  <ul>
+                    <li><strong>Head Doctors</strong> create and maintain checklists (items, scoring guidance, active status).</li>
+                    <li><strong>Psychometricians</strong> select a child and checklist, score items (typically 0–3), set severity, and submit.</li>
+                    <li>When scores are ready, request an <strong>AI recommendation</strong>. Treat it as a draft, not a diagnosis.</li>
+                    <li>Teachers review recommendations in the mobile app. Only after review should recommendations guide therapy plans.</li>
+                    <li>Use Assessments to revisit recent submissions, AI status (needs AI / awaiting review / approved / modified), and child linkage.</li>
+                  </ul>
+                  <div class="help-callout">
+                    <strong>Safety:</strong> AI output must never replace clinical judgment. A person must review before it becomes an active plan.
+                  </div>
+                </div>
+              </section>
+
+              <section class="help-chapter" id="help-therapy" data-help-roles="head_doctor">
+                <header class="help-chapter__head">
+                  <span class="help-chapter__num">05</span>
+                  <div>
+                    <h4>Therapy and medication</h4>
+                    <p>Schedule sessions, set durations, and keep dose windows visible.</p>
+                  </div>
+                </header>
+                <div class="help-chapter__content">
+                  <p>Teachers schedule therapy sessions from the mobile app. Head Doctors use the web calendar for oversight and still manage medication schedules.</p>
+                  <ul>
+                    <li>Review upcoming and completed sessions on the Therapy calendar (view only).</li>
+                    <li>Send parent progress updates from the Dashboard or a child profile Progress tab.</li>
+                    <li>When a session time is reached, SmartCare posts a notification for staff who opted into schedule alerts.</li>
+                    <li>Configure medication schedules with times of day. Caretakers log doses (given/skipped) in the mobile app.</li>
+                    <li>Dose logs and due reminders surface in your notification list so gaps are easier to catch.</li>
+                    <li>Overview session health and upcoming sessions help you see completion vs. scheduled load at a glance.</li>
+                  </ul>
+                </div>
+              </section>
+
+              <section class="help-chapter" id="help-reports" data-help-roles="head_doctor">
+                <header class="help-chapter__head">
+                  <span class="help-chapter__num">06</span>
+                  <div>
+                    <h4>Reports, staff, and materials</h4>
+                    <p>Export briefs, manage accounts, and share learning resources.</p>
+                  </div>
+                </header>
+                <div class="help-chapter__content">
+                  <ul>
+                    <li><strong>Reports:</strong> Export facility or child briefs as PDF/CSV from Reports, or use Weekly brief on Overview.</li>
+                    <li><strong>Staff:</strong> Create accounts, assign roles, resend verification email, and deactivate users you no longer need.</li>
+                    <li><strong>Materials:</strong> Upload or manage learning materials that teachers can open on mobile.</li>
+                    <li><strong>Settings → Facility:</strong> Facility name, timezone, default session length, and reminder lead minutes.</li>
+                  </ul>
+                  <div class="help-callout help-callout--soft">
+                    <strong>Access:</strong> New staff must verify email before first sign-in. Unverified users appear clearly in Staff.
+                  </div>
+                </div>
+              </section>
+
+              <section class="help-chapter" id="help-roles">
+                <header class="help-chapter__head">
+                  <span class="help-chapter__num">07</span>
+                  <div>
+                    <h4>Who uses which app</h4>
+                    <p>Web for clinical leadership; mobile for day-to-day care.</p>
+                  </div>
+                </header>
+                <div class="help-chapter__content">
+                  <div class="help-role-grid">
+                    <div class="help-role-card">
+                      <strong>Head Doctor</strong>
+                      <p>Full web workspace: staff, schedules, materials, facility settings, reports, and oversight of assessments.</p>
+                    </div>
+                    <div class="help-role-card">
+                      <strong>Psychometrician</strong>
+                      <p>Web access for children, checklists, assessments, AI drafts, and child reports.</p>
+                    </div>
+                    <div class="help-role-card">
+                      <strong>Teacher</strong>
+                      <p>Mobile app: review AI recommendations, therapy sessions, materials, and medication visibility for assigned children.</p>
+                    </div>
+                    <div class="help-role-card">
+                      <strong>Caretaker</strong>
+                      <p>Mobile app: medication administration logs and child care routines.</p>
+                    </div>
+                    <div class="help-role-card help-role-card--wide">
+                      <strong>Parent</strong>
+                      <p>Mobile app: progress, care updates, therapy visibility, and messaging shared with the care team.</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="help-chapter" id="help-tips">
+                <header class="help-chapter__head">
+                  <span class="help-chapter__num">08</span>
+                  <div>
+                    <h4>Tips and safety</h4>
+                    <p>Keep the facility data clean, private, and actionable.</p>
+                  </div>
+                </header>
+                <div class="help-chapter__content">
+                  <ul>
+                    <li>Sign out other devices from Settings if a shared computer was used.</li>
+                    <li>Prefer clear diagnosis/care notes so mobile roles understand context without guessing.</li>
+                    <li>Review Priority queue daily — pending AI reviews and inactive profiles accumulate quickly.</li>
+                    <li>Never share passwords. Use unique accounts per staff member.</li>
+                    <li>Treat exports as confidential: store PDFs/CSVs only on approved facility systems.</li>
+                  </ul>
+                  <div class="help-callout">
+                    <strong>Need help?</strong> Contact your Head Doctor for account access, or your facility admin if the API/server is unavailable.
+                  </div>
+                </div>
+              </section>
+            </div>
+          </article>
+        </section>

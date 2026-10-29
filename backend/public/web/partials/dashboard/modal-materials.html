@@ -1,0 +1,101 @@
+<dialog class="modal modal--medication" id="modal-materials" aria-labelledby="modal-materials-title">
+    <div class="modal__card modal__card--medication">
+      <div class="modal__header modal__header--assessment">
+        <div class="modal__header-main">
+          <span class="staff-modal-face" id="modal-materials-face">
+            <span class="modal__header-icon" id="modal-materials-icon-wrap">
+              <img id="modal-materials-icon" src="https://api.iconify.design/lucide/book-open.svg?color=%230F3D30" alt="" width="22" height="22">
+            </span>
+          </span>
+          <div>
+            <h3 id="modal-materials-title">Add material</h3>
+            <p class="modal__subtitle" id="modal-materials-subtitle">Add a resource the AI catalog and teachers can use.</p>
+          </div>
+        </div>
+        <button type="button" class="modal__close modal__close--round" data-close-modal aria-label="Close">
+          <img src="https://api.iconify.design/lucide/x.svg?color=%235C6775" alt="" width="18" height="18">
+        </button>
+      </div>
+
+      <div class="modal__body modal__body--therapy">
+        <div id="materials-modal-alert" class="alert" hidden role="alert"></div>
+
+        <form id="materials-panel-form" class="materials-modal-panel materials-form" hidden>
+          <input type="hidden" id="material-id" value="">
+
+          <section class="therapy-block materials-form__block">
+            <h4 class="therapy-block__title">Details</h4>
+            <div class="form-group">
+              <label for="material-title">Title</label>
+              <input type="text" id="material-title" class="field-control" maxlength="255" required placeholder="e.g. Picture exchange cards">
+            </div>
+            <div class="form-group">
+              <label id="material-type-label">Type</label>
+              <div class="therapy-pills" role="group" aria-labelledby="material-type-label" id="material-types">
+                <button type="button" data-type="worksheet">Worksheet</button>
+                <button type="button" data-type="visual" class="is-active">Visual aid</button>
+                <button type="button" data-type="video">Video</button>
+                <button type="button" data-type="audio">Audio</button>
+                <button type="button" data-type="activity">Activity</button>
+                <button type="button" data-type="guide">Guide</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="material-description">Description</label>
+              <textarea id="material-description" class="field-control" rows="3" placeholder="e.g. Short visual prompts for requesting items during sessions"></textarea>
+              <p class="form-hint">How teachers or parents should use this resource.</p>
+            </div>
+          </section>
+
+          <section class="therapy-block materials-form__block">
+            <h4 class="therapy-block__title">Catalog tags</h4>
+            <p class="form-hint materials-form__hint">Tags help AI recommendations match this resource to assessment focus areas.</p>
+            <div class="therapy-pills" role="group" aria-label="Focus tags" id="material-tags">
+              <button type="button" data-tag="communication">Communication</button>
+              <button type="button" data-tag="social">Social</button>
+              <button type="button" data-tag="fine motor">Fine motor</button>
+              <button type="button" data-tag="cognitive">Cognitive</button>
+              <button type="button" data-tag="self-care">Self-care</button>
+            </div>
+          </section>
+
+          <section class="therapy-block materials-form__block">
+            <h4 class="therapy-block__title">File</h4>
+            <div class="form-group">
+              <label for="material-file">Attachment <span class="materials-form__optional">(optional)</span></label>
+              <input type="file" id="material-file" class="field-control materials-form__file" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.mp3,.wav,.mp4,.webm,.doc,.docx">
+              <p class="form-hint" id="material-file-hint">PDF, image, audio, video, or document. Max 10 MB. Metadata-only items still appear in the AI catalog.</p>
+            </div>
+          </section>
+        </form>
+
+        <div id="materials-panel-view" class="materials-modal-panel materials-view" hidden>
+          <div class="materials-view__toolbar" id="materials-view-toolbar"></div>
+          <div class="materials-view__grid">
+            <section class="materials-view__section" aria-labelledby="materials-view-meta-heading">
+              <h4 class="materials-view__heading" id="materials-view-meta-heading">Details</h4>
+              <dl class="materials-view__meta" id="materials-detail-list"></dl>
+            </section>
+            <section class="materials-view__section" aria-labelledby="materials-view-file-heading">
+              <h4 class="materials-view__heading" id="materials-view-file-heading">Attachment</h4>
+              <div id="materials-view-file"></div>
+            </section>
+          </div>
+          <section class="materials-view__section materials-view__section--prose" aria-labelledby="materials-view-desc-heading">
+            <h4 class="materials-view__heading" id="materials-view-desc-heading">Description</h4>
+            <div id="materials-view-notes"></div>
+          </section>
+        </div>
+
+        <div id="materials-panel-remove" class="materials-modal-panel therapy-confirm" hidden>
+          <p class="therapy-confirm__copy" id="materials-remove-copy">Remove this material from the library?</p>
+          <p class="therapy-confirm__hint" id="materials-remove-hint">It will no longer appear in the catalog or AI recommendations.</p>
+        </div>
+      </div>
+
+      <div class="modal__footer modal__footer--assessment">
+        <button type="button" class="btn btn-secondary" id="materials-modal-dismiss" data-close-modal>Cancel</button>
+        <div class="modal__footer-end" id="materials-modal-actions"></div>
+      </div>
+    </div>
+  </dialog>

@@ -1,0 +1,75 @@
+<section id="section-children" class="section-panel" aria-labelledby="children-heading" data-web-roles="head_doctor,psychometrician">
+          <h2 id="children-heading" class="visually-hidden">Children Registry</h2>
+          <div class="section-actions">
+            <button type="button" class="btn btn-secondary" id="open-assign-modal" data-open-modal="modal-assign">
+              <img src="https://api.iconify.design/lucide/user-check.svg?color=%230F3D30" alt="" width="18" height="18">
+              Assign care team
+            </button>
+            <button type="button" class="btn btn-primary" id="open-child-modal" data-open-modal="modal-child">
+              <img src="https://api.iconify.design/lucide/user-plus.svg?color=%23FFFFFF" alt="" width="18" height="18">
+              Register Child
+            </button>
+          </div>
+
+          <div class="panel registry-panel" id="children-list-panel">
+            <div class="registry-filters" id="children-filters">
+              <label class="registry-search" for="children-search">
+                <img src="https://api.iconify.design/lucide/search.svg?color=%235C6775" alt="" width="16" height="16">
+                <span class="visually-hidden">Search name or ID</span>
+                <input type="search" id="children-search" placeholder="Search name or ID…">
+              </label>
+              <select id="children-filter-status" class="field-control registry-filters__status" aria-label="Filter by status">
+                <option value="active" selected>Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="all">All children</option>
+                <option value="deleted" id="children-filter-status-deleted" hidden>Deleted</option>
+              </select>
+              <select id="children-filter-diagnosis" class="field-control registry-filters__diagnosis" aria-label="Filter by diagnosis">
+                <option value="">All Diagnoses</option>
+              </select>
+              <input type="number" id="children-filter-age" class="field-control registry-filters__age" min="1" max="100" placeholder="Age" aria-label="Filter by age">
+              <button type="button" class="icon-btn icon-btn--sm registry-filters__clear" id="children-filter-clear" title="Clear filters" aria-label="Clear filters">
+                <img src="https://api.iconify.design/lucide/x.svg?color=%235C6775" alt="" width="16" height="16">
+              </button>
+            </div>
+            <p class="form-hint" id="children-status-hint" hidden></p>
+
+            <p class="form-hint" id="create-child-restricted" hidden>Only Head Doctors and Psychometricians can add children.</p>
+            <div id="children-loading" class="loading">Loading children…</div>
+            <div id="children-empty" class="empty-state" hidden>
+              <h3>No children yet</h3>
+              <p>Register the first child profile to begin assessments and therapy planning.</p>
+              <button type="button" class="btn btn-primary" id="empty-open-child" data-open-modal="modal-child">
+                <img src="https://api.iconify.design/lucide/user-plus.svg?color=%23FFFFFF" alt="" width="18" height="18">
+                Register Child
+              </button>
+            </div>
+            <div class="data-table-wrap" id="children-table-wrap" hidden>
+              <table class="data-table data-table--registry" aria-label="Children registry">
+                <thead>
+                  <tr>
+                    <th>Patient ID</th>
+                    <th>Name</th>
+                    <th>Diagnosis</th>
+                    <th>Age Band</th>
+                    <th>Care team</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="children-tbody"></tbody>
+              </table>
+              <div class="registry-footer">
+                <p id="children-page-info">Showing 0 of 0 records</p>
+                <div class="registry-pager">
+                  <button type="button" class="icon-btn" id="children-page-prev" aria-label="Previous page">
+                    <img src="https://api.iconify.design/lucide/chevron-left.svg?color=%235C6775" alt="" width="18" height="18">
+                  </button>
+                  <button type="button" class="icon-btn" id="children-page-next" aria-label="Next page">
+                    <img src="https://api.iconify.design/lucide/chevron-right.svg?color=%235C6775" alt="" width="18" height="18">
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
