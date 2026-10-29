@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign in — SmartCare</title>
+  <link rel="icon" href="assets/favicon.png" type="image/png" sizes="32x32"> <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180"> <link rel="stylesheet" href="css/styles.css?v=20261023childui">
+  <link rel="icon" href="assets/favicon.png" type="image/png" sizes="32x32"> <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180"> <link rel="stylesheet" href="css/login.css?v=20260827r3">
+</head>
+<body class="page-auth">
+  <a class="skip-link" href="#login-form">Skip to sign in</a>
+
+  <!-- Smooth S-curve for left panel edge -->
+  <svg class="login-clip-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <clipPath id="login-wave" clipPathUnits="objectBoundingBox">
+        <path d="M0,0 H0.88 C0.97,0.08 0.92,0.18 0.86,0.28 C0.78,0.40 0.72,0.48 0.74,0.56 C0.76,0.66 0.88,0.74 0.92,0.84 C0.95,0.92 0.90,0.97 0.84,1 H0 Z"/>
+      </clipPath>
+    </defs>
+  </svg>
+
+  <div class="login-viewport">
+    <div class="login-shell">
+      <aside class="login-aside" aria-label="SmartCare introduction">
+        <div class="login-aside__content">
+          <h1 class="login-aside__brand">SmartCare</h1>
+          <p class="login-aside__copy">
+            Secure workspace for Head Doctors and Psychometricians at Malvar Assisted Facility.
+          </p>
+        </div>
+
+        <p class="login-aside__pin">
+          <img src="https://api.iconify.design/lucide/map-pin.svg?color=%23FFFFFF" alt="" width="13" height="13">
+          Malvar, Batangas
+        </p>
+      </aside>
+
+      <main class="login-main">
+        <div class="login-card" id="login-form">
+          <a class="login-back" href="index.html">← Back to home</a>
+
+          <header class="login-header">
+            <h2>Welcome back</h2>
+            <p>Web sign-in is for Head Doctors and Psychometricians. Teachers, caretakers, and parents use the SmartCare mobile app.</p>
+          </header>
+
+          <div id="login-alert" class="alert alert-error" hidden role="alert"></div>
+
+          <form id="login-form-el" novalidate>
+            <div class="login-field">
+              <label for="username">Username</label>
+              <div class="login-input">
+                <img class="login-input__icon" src="https://api.iconify.design/lucide/user.svg?color=%235C6775" alt="" width="18" height="18">
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  autocomplete="username"
+                  required
+                  placeholder="Enter your username"
+                >
+              </div>
+            </div>
+
+            <div class="login-field">
+              <label for="password">Password</label>
+              <div class="login-input">
+                <img class="login-input__icon" src="https://api.iconify.design/lucide/lock.svg?color=%235C6775" alt="" width="18" height="18">
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  autocomplete="current-password"
+                  required
+                  placeholder="Enter your password"
+                >
+                <button type="button" class="login-input__toggle" id="toggle-password" aria-label="Show password">
+                  <img id="toggle-password-icon" src="https://api.iconify.design/lucide/eye.svg?color=%235C6775" alt="" width="18" height="18">
+                </button>
+              </div>
+            </div>
+
+            <div class="login-row">
+              <label class="login-remember">
+                <input type="checkbox" id="remember" name="remember">
+                <span>Remember me</span>
+              </label>
+              <a class="login-forgot" href="#forgot">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn login-submit" id="login-btn">Sign in</button>
+          </form>
+
+          <div class="login-divider" aria-hidden="true"><span>or</span></div>
+
+          <div class="login-google-wrap">
+            <div id="google-btn-gis" class="login-google-gis" aria-label="Sign in with Google"></div>
+          </div>
+
+          <aside class="login-secure" aria-label="Security notice">
+            <img src="https://api.iconify.design/lucide/shield-check.svg?color=%230F3D30" alt="" width="22" height="22">
+            <div>
+              <strong>Secure &amp; Private</strong>
+              <p>Your data is encrypted and securely stored.<br>Your information is protected and handled securely.</p>
+            </div>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="js/api.js?v=20260827a"></script>
+  <script src="js/auth.js?v=20260827a"></script>
+  <script src="js/dashboard/icons.js"></script>
+  <script>
+    if (SmartCareAuth.redirectIfAuthenticated()) {
+      /* redirected */
+    } else {
+      const form = document.getElementById('login-form-el');
+      const alertEl = document.getElementById('login-alert');
+      const denied = new URLSearchParams(window.location.search).get('denied');
+      if (denied === 'mobile' && alertEl) {
+        alertEl.hidden = false;
+        alertEl.className = 'alert alert-error';
+        alertEl.textContent = SmartCareAuth.MOBILE_DENIED_MESSAGE;
+      }
+      const btn = document.getElementById('login-btn');
+      const password = document.getElementById('password');
+      const toggle = document.getElementById('toggle-password');
+      const toggleIcon = document.getElementById('toggle-password-icon');
+      const googleGis = document.getElementById('google-btn-gis');
+      const params = new URLSearchParams(window.location.search);
+      const preferGoogle = params.get('google') === '1' || params.get('verified') === '1';
+      const loginHint = (params.get('email') || '').trim();
+
+      let googleReady = false;
+      let googleClientId = '';
+      let googleBusy = false;
+      let googleButtonRendered = false;
+
+      if (preferGoogle && alertEl) {
+        alertEl.hidden = false;
+        alertEl.className = 'alert alert-success';
+        alertEl.textContent = loginHint
+          ? `Email verified for ${loginHint}. Continue with that Google account to sign in.`
+          : 'Email verified. Continue with Google to sign in.';
+      }
+
+      function showAlert(message) {
+        alertEl.hidden = false;
+        alertEl.className = 'alert alert-error';
+        alertEl.textContent = message;
+      }
+
+      async function completeGoogleSignIn(idToken) {
+        if (!idToken) {
+          throw new Error('Google did not return a sign-in credential. Try again.');
+        }
+        if (typeof SmartCareAuth?.googleLogin === 'function') {
+          return SmartCareAuth.googleLogin(idToken);
+        }
+        const result = await SmartCareAPI.post('/auth/google', {
+          id_token: idToken,
+          client: 'web',
+        });
+        if (!SmartCareAuth.canAccessWeb(result.user)) {
+          SmartCareAuth.clearSession();
+          throw new Error(SmartCareAuth.MOBILE_DENIED_MESSAGE);
+        }
+        SmartCareAPI.setToken(result.token);
+        SmartCareAuth.setStoredUser(result.user);
+        return result.user;
+      }
+
+      async function handleGoogleCredential(response) {
+        if (googleBusy) return;
+        googleBusy = true;
+        if (!preferGoogle) alertEl.hidden = true;
+        try {
+          const user = await completeGoogleSignIn(response?.credential);
+          window.location.href = SmartCareAuth.homePageForUser(user);
+        } catch (err) {
+          showAlert(err.message || 'Google sign-in failed.');
+          googleBusy = false;
+        }
+      }
+
+      function renderOfficialGoogleButton() {
+        if (!googleGis || !window.google?.accounts?.id || googleButtonRendered) return;
+        googleGis.innerHTML = '';
+        const width = Math.max(280, Math.floor((googleGis.parentElement?.clientWidth || 320)));
+        window.google.accounts.id.renderButton(googleGis, {
+          type: 'standard',
+          theme: 'outline',
+          size: 'large',
+          text: 'signin_with',
+          shape: 'pill',
+          logo_alignment: 'left',
+          width,
+          locale: 'en',
+        });
+        googleButtonRendered = true;
+      }
+
+      function initGoogleClient() {
+        if (!window.google?.accounts?.id || !googleClientId) return false;
+        const options = {
+          client_id: googleClientId,
+          callback: handleGoogleCredential,
+          auto_select: Boolean(preferGoogle && loginHint),
+          cancel_on_tap_outside: true,
+          context: 'signin',
+          use_fedcm_for_prompt: false,
+        };
+        if (loginHint) options.login_hint = loginHint;
+        window.google.accounts.id.initialize(options);
+        googleReady = true;
+        renderOfficialGoogleButton();
+        if (preferGoogle) {
+          window.setTimeout(() => {
+            try {
+              window.google.accounts.id.prompt();
+            } catch {
+              /* ignore */
+            }
+          }, 400);
+        }
+        return true;
+      }
+
+      async function initGoogleSignIn() {
+        try {
+          const config = await SmartCareAPI.get('/app-config');
+          googleClientId = (config?.google_client_id || '').trim();
+          if (!googleClientId) {
+            if (googleGis) googleGis.hidden = true;
+            return;
+          }
+          if (!initGoogleClient()) {
+            let tries = 0;
+            const timer = setInterval(() => {
+              tries += 1;
+              if (initGoogleClient() || tries > 40) clearInterval(timer);
+            }, 150);
+          }
+        } catch {
+          /* password login still works */
+        }
+      }
+
+      toggle?.addEventListener('click', () => {
+        const show = password.type === 'password';
+        password.type = show ? 'text' : 'password';
+        toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        const current = document.getElementById('toggle-password-icon');
+        if (window.SmartCareApp?.icon && current) {
+          const wrap = document.createElement('span');
+          wrap.innerHTML = SmartCareApp.icon(show ? 'eye-off' : 'eye', { size: 18, className: 'login-input__icon' });
+          const node = wrap.firstChild;
+          if (node) {
+            node.id = 'toggle-password-icon';
+            current.replaceWith(node);
+          }
+        }
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alertEl.hidden = true;
+        btn.disabled = true;
+        btn.textContent = 'Signing in…';
+        try {
+          await SmartCareAuth.login(
+            document.getElementById('username').value.trim(),
+            document.getElementById('password').value
+          );
+          window.location.href = SmartCareAuth.homePageForUser(SmartCareAuth.getStoredUser());
+        } catch (err) {
+          alertEl.textContent = err.message || 'Sign in failed. Check your credentials.';
+          alertEl.hidden = false;
+          btn.disabled = false;
+          btn.textContent = 'Sign in';
+        }
+      });
+
+      initGoogleSignIn();
+    }
+  </script>
+</body>
+</html>

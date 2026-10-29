@@ -1,0 +1,47 @@
+<section id="section-medication" class="section-panel" data-web-roles="head_doctor" aria-labelledby="medication-heading">
+          <h2 id="medication-heading" class="visually-hidden">Medication Schedules</h2>
+          <div class="section-actions">
+            <button type="button" class="btn btn-primary" id="open-medication-schedule">+ Add schedule</button>
+          </div>
+
+          <div class="panel library-panel medication-panel">
+            <div class="panel-toolbar panel-toolbar--library">
+              <div class="panel-toolbar__start">
+                <span class="panel-toolbar__icon" aria-hidden="true">
+                  <img src="https://api.iconify.design/lucide/pill.svg?color=%230F4C4A" alt="" width="20" height="20">
+                </span>
+                <div>
+                  <h3 class="panel-title">Medication plans</h3>
+                  <p class="panel-toolbar__hint" id="medication-summary-line">Grouped by child (A–Z) — expand a child to view their schedules</p>
+                </div>
+              </div>
+              <span class="count-chip" id="medication-toolbar-count">0</span>
+            </div>
+            <div class="filter-bar staff-filters">
+              <label class="search-field" for="medication-search">
+                <span class="visually-hidden">Search schedules</span>
+                <input type="search" id="medication-search" class="field-control field-control--search" placeholder="Search child or medicine…">
+              </label>
+              <select class="field-control" id="medication-filter-child" aria-label="Filter by child">
+                <option value="">All children</option>
+              </select>
+              <select class="field-control" id="medication-filter-status" aria-label="Filter by status">
+                <option value="">All statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div id="medication-loading" class="loading">Loading medication schedules…</div>
+            <div id="medication-empty" class="empty-state" hidden>
+              <h3>No schedules yet</h3>
+              <p>Add a plan so caretakers can see today’s doses on mobile.</p>
+              <button type="button" class="btn btn-primary" id="empty-open-medication">+ Add schedule</button>
+            </div>
+            <div class="assessment-groups medication-groups" id="medication-groups" hidden></div>
+            <nav class="list-pagination" id="medication-pagination" hidden aria-label="Medication schedules pagination">
+              <button type="button" class="btn btn-secondary btn-sm" id="medication-page-prev">Previous</button>
+              <p class="list-pagination__meta" id="medication-page-meta">Page 1</p>
+              <button type="button" class="btn btn-secondary btn-sm" id="medication-page-next">Next</button>
+            </nav>
+          </div>
+        </section>

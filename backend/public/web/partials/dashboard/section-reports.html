@@ -1,0 +1,52 @@
+<section id="section-reports" class="section-panel report-studio" aria-labelledby="reports-heading" data-web-roles="head_doctor,psychometrician">
+          <h2 id="reports-heading" class="visually-hidden">Reports</h2>
+
+          <div class="report-toolbar">
+            <div class="report-toolbar__type" role="radiogroup" aria-label="Report type">
+              <button type="button" class="report-type-btn is-active" id="report-type-facility" data-report-type="facility" aria-pressed="true">Facility overview</button>
+              <button type="button" class="report-type-btn" id="report-type-medication" data-report-type="medication" aria-pressed="false" hidden>Medication log</button>
+              <button type="button" class="report-type-btn" id="report-type-child" data-report-type="child" aria-pressed="false">Child record</button>
+            </div>
+            <div class="report-toolbar__child" id="report-child-field" hidden>
+              <label class="visually-hidden" for="report-child">Child</label>
+              <select id="report-child" class="field-control">
+                <option value="">Select a child…</option>
+              </select>
+            </div>
+            <div class="report-toolbar__period" id="report-period-field">
+              <div class="report-period-presets" role="group" aria-label="Report period">
+                <button type="button" class="report-period-btn" data-report-period="weekly" aria-pressed="false" hidden>Weekly</button>
+                <button type="button" class="report-period-btn is-active" data-report-period="monthly" aria-pressed="true">Monthly</button>
+                <button type="button" class="report-period-btn" data-report-period="quarterly" aria-pressed="false">Quarterly</button>
+                <button type="button" class="report-period-btn" data-report-period="annually" aria-pressed="false">Annually</button>
+                <button type="button" class="report-period-btn" data-report-period="custom" aria-pressed="false">Custom</button>
+              </div>
+              <div class="report-period-dates">
+                <label class="report-period-date" for="report-date-from">
+                  <span>From</span>
+                  <input type="date" id="report-date-from" class="field-control">
+                </label>
+                <label class="report-period-date" for="report-date-to">
+                  <span>To</span>
+                  <input type="date" id="report-date-to" class="field-control">
+                </label>
+              </div>
+            </div>
+            <div class="report-toolbar__actions">
+              <button type="button" class="btn btn-secondary" id="report-export-csv" disabled>Export CSV</button>
+              <button type="button" class="btn btn-primary" id="report-export-pdf" disabled>Export PDF</button>
+            </div>
+          </div>
+
+          <p class="report-stage-hint" id="report-stage-hint">Choose a date range (monthly, quarterly, annually, or custom), then preview. Export PDF opens the print dialog; Export CSV downloads the same figures.</p>
+          <div id="report-alert" class="alert" hidden role="alert"></div>
+
+          <div class="report-stage" id="report-stage">
+            <div id="report-loading" class="loading">Preparing report…</div>
+            <div id="report-empty" class="report-empty" hidden>
+              <h3>Select a child</h3>
+              <p>Choose a child to generate a printable record of assessments, therapy, and recommendations.</p>
+            </div>
+            <article class="report-sheet" id="report-sheet" hidden aria-label="Exported report preview"></article>
+          </div>
+        </section>

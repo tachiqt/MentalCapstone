@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "SmartCare",
+    "slug": "mental",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "smartcare",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.smartcare.mobile"
+    },
+    "android": {
+      "package": "com.smartcare.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "@react-native-google-signin/google-signin",
+      "expo-font",
+      "expo-status-bar",
+      "expo-splash-screen"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7fb04ee5-7bc0-4ef0-9377-901290669d35"
+      }
+    },
+    "owner": "tachiqttt"
+  }
+}

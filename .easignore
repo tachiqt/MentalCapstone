@@ -1,0 +1,25 @@
+# EAS archives from the repository root, so everything that is not the Expo app
+# has to be excluded. Laravel's storage symlink in particular cannot be
+# recreated inside the build archive on Windows and fails the upload.
+backend/
+web/
+mobile/
+docs/
+specs/
+design-system/
+.specify/
+.cursor/
+*.md
+
+# Local build artefacts and emulator screenshots: large, and never inputs to a build.
+*.apk
+*.aab
+mobile-rn/shot*.png
+mobile-rn/.expo/
+mobile-rn/node_modules/
+
+# Generated native folders. A local Windows prebuild bakes absolute paths into
+# android/ (e.g. react-native-worklets), which then fails Gradle on EAS Linux.
+# Leaving these out lets EAS run `expo prebuild` on the builder.
+mobile-rn/android/
+mobile-rn/ios/

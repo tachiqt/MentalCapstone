@@ -1,0 +1,166 @@
+<dialog class="modal modal--checklist" id="modal-checklist" aria-labelledby="modal-checklist-title">
+    <div class="modal__card modal__card--assessment">
+      <div class="modal__header modal__header--assessment">
+        <div class="modal__header-main">
+          <span class="modal__header-icon" aria-hidden="true">
+            <img src="https://api.iconify.design/lucide/list-plus.svg?color=%230F3D30" alt="" width="22" height="22">
+          </span>
+          <div>
+            <h3 id="modal-checklist-title">Create Checklist</h3>
+            <p class="modal__subtitle">Define purpose → AI draft → review items → publish for assessments.</p>
+          </div>
+        </div>
+        <button type="button" class="modal__close modal__close--round" data-close-modal aria-label="Close">
+          <img src="https://api.iconify.design/lucide/x.svg?color=%235C6775" alt="" width="18" height="18">
+        </button>
+      </div>
+
+      <div class="modal__body modal__body--assessment">
+        <div id="create-checklist-alert" class="alert" hidden role="alert"></div>
+
+        <ol class="wizard-steps" id="checklist-wizard-steps" aria-label="Checklist creation steps">
+          <li class="is-active" data-step="1"><span class="wizard-steps__num">1</span><span class="wizard-steps__label">Define</span></li>
+          <li data-step="2"><span class="wizard-steps__num">2</span><span class="wizard-steps__label">AI draft</span></li>
+          <li data-step="3"><span class="wizard-steps__num">3</span><span class="wizard-steps__label">Review</span></li>
+          <li data-step="4"><span class="wizard-steps__num">4</span><span class="wizard-steps__label">Publish</span></li>
+        </ol>
+
+        <form id="create-checklist-form" class="assessment-form" novalidate>
+          <section class="wizard-pane is-active" data-pane="1">
+            <section class="assessment-section assessment-section--details" aria-labelledby="checklist-define-title">
+              <h4 id="checklist-define-title" class="assessment-section__title">
+                <img src="https://api.iconify.design/lucide/sliders-horizontal.svg?color=%230F3D30" alt="" width="16" height="16">
+                Checklist definition
+              </h4>
+              <div class="assessment-details-grid">
+                <div class="form-group">
+                  <label for="checklist-title">Checklist title <span class="req-mark" aria-hidden="true">*</span></label>
+                  <input type="text" id="checklist-title" class="field-control" required maxlength="255" placeholder="e.g. Early Motor Baseline V1" autocomplete="off">
+                  <p class="field-error" hidden></p>
+                </div>
+                <div class="form-group">
+                  <label for="checklist-category">Primary category <span class="req-mark" aria-hidden="true">*</span></label>
+                  <input type="text" id="checklist-category" class="field-control" required maxlength="255" placeholder="e.g. Motor Skills, Communication" autocomplete="off">
+                  <p class="field-error" hidden></p>
+                </div>
+                <div class="form-group">
+                  <label for="checklist-age-band">Age focus</label>
+                  <input type="text" id="checklist-age-band" class="field-control" placeholder="e.g. 18+, adults, 7-12" autocomplete="off">
+                </div>
+                <div class="form-group">
+                  <label for="checklist-diagnosis">Diagnosis focus</label>
+                  <input type="text" id="checklist-diagnosis" class="field-control" placeholder="e.g. ASD, ADHD, mixed" autocomplete="off">
+                </div>
+                <div class="form-group">
+                  <label for="checklist-item-count">Suggested item count</label>
+                  <input type="number" id="checklist-item-count" class="field-control" min="4" max="16" value="8">
+                </div>
+                <div class="form-group">
+                  <label for="checklist-scoring">Scoring scale</label>
+                  <input type="text" id="checklist-scoring" class="field-control" value="0–3 observation scale" readonly>
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                  <label for="checklist-purpose">Clinical purpose <span class="req-mark" aria-hidden="true">*</span></label>
+                  <textarea id="checklist-purpose" class="field-control field-control--tall field-control--autosize" rows="3" required placeholder="What should this checklist help evaluate? e.g. fine-motor readiness for writing tasks"></textarea>
+                  <p class="field-error" hidden></p>
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                  <label for="checklist-description">Library description</label>
+                  <textarea id="checklist-description" class="field-control field-control--autosize" rows="2" placeholder="Short summary shown in the Checklists Library"></textarea>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="wizard-pane" data-pane="2" hidden>
+            <section class="assessment-section" aria-labelledby="checklist-ai-title">
+              <div class="assessment-section__head">
+                <h4 id="checklist-ai-title" class="assessment-section__title">
+                  <img src="https://api.iconify.design/lucide/sparkles.svg?color=%230F3D30" alt="" width="16" height="16">
+                  Generate observation items with AI
+                </h4>
+                <p class="assessment-section__hint">AI drafts prompts from your purpose. Review every item before publishing. AI never diagnoses or recommends medication.</p>
+              </div>
+              <ul class="ai-draft-summary" id="checklist-ai-summary"></ul>
+              <p class="form-hint" id="checklist-ai-status" hidden></p>
+            </section>
+          </section>
+
+          <section class="wizard-pane" data-pane="3" hidden>
+            <section class="assessment-section assessment-section--responses" aria-labelledby="checklist-review-title">
+              <div class="assessment-section__head">
+                <h4 id="checklist-review-title" class="assessment-section__title">
+                  <img src="https://api.iconify.design/lucide/list-checks.svg?color=%230F3D30" alt="" width="16" height="16">
+                  Review &amp; edit items
+                </h4>
+                <p class="assessment-section__hint">Score guide: 0 not observed · 1 emerging · 2 developing · 3 consistent.</p>
+              </div>
+              <div class="assessment-score-guide" id="checklist-scoring-guide">
+                <div class="assessment-score-guide__copy">
+                  <span class="assessment-score-guide__label">
+                    <img src="https://api.iconify.design/lucide/info.svg?color=%230F3D30" alt="" width="14" height="14">
+                    Scoring hints
+                  </span>
+                  <p class="assessment-score-guide__text">Use scoring hints as reviewer cues — edit prompts so they stay clear and complete.</p>
+                </div>
+                <div class="assessment-score-guide__chips" aria-hidden="true">
+                  <span><strong>0</strong> not observed</span>
+                  <span><strong>1</strong> emerging</span>
+                  <span><strong>2</strong> developing</span>
+                  <span><strong>3</strong> consistent</span>
+                </div>
+              </div>
+              <div class="checklist-items" id="checklist-items-container"></div>
+              <div class="form-actions form-actions--start">
+                <button type="button" class="btn btn-secondary" id="add-checklist-item-btn">+ Add item</button>
+                <button type="button" class="btn btn-secondary" id="checklist-regenerate-ai-btn">Regenerate with AI</button>
+              </div>
+            </section>
+          </section>
+
+          <section class="wizard-pane wizard-pane--publish" data-pane="4" hidden>
+            <section class="assessment-section" aria-labelledby="publish-options-title">
+              <h4 id="publish-options-title" class="assessment-section__title">
+                <img src="https://api.iconify.design/lucide/send.svg?color=%230F3D30" alt="" width="16" height="16">
+                Publish to library
+              </h4>
+              <p class="assessment-section__hint" style="margin-bottom:1rem">Published checklists appear in Assessments for Head Doctors and Psychometricians.</p>
+              <div class="publish-options">
+                <label class="publish-option" for="checklist-is-active">
+                  <input type="checkbox" id="checklist-is-active" checked>
+                  <span>
+                    <strong>Set as active</strong>
+                    <small>Ready for assessments immediately after publish</small>
+                  </span>
+                </label>
+                <label class="publish-option" for="checklist-open-assessment">
+                  <input type="checkbox" id="checklist-open-assessment">
+                  <span>
+                    <strong>Open New Assessment</strong>
+                    <small>Jump to assessment with this checklist selected</small>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <div class="publish-preview" id="checklist-publish-preview"></div>
+          </section>
+        </form>
+      </div>
+
+      <div class="modal__footer modal__footer--assessment">
+        <button type="button" class="btn btn-secondary" data-close-modal id="checklist-footer-cancel">Cancel</button>
+        <button type="button" class="btn btn-secondary" data-checklist-step="1" id="checklist-footer-back" hidden>Back</button>
+        <div class="modal__footer-end">
+          <button type="button" class="btn btn-primary" id="checklist-step-to-ai">Continue to AI draft</button>
+          <button type="button" class="btn btn-secondary" id="checklist-skip-ai-btn" hidden>Skip AI · start blank</button>
+          <button type="button" class="btn btn-accent" id="checklist-generate-ai-btn" hidden>
+            <img src="https://api.iconify.design/lucide/sparkles.svg?color=%230F3D30" alt="" width="16" height="16">
+            Generate AI draft
+          </button>
+          <button type="button" class="btn btn-primary" id="checklist-step-to-review" hidden disabled>Review items</button>
+          <button type="button" class="btn btn-primary" id="checklist-step-to-publish" hidden>Continue to publish</button>
+          <button type="submit" class="btn btn-primary" id="checklist-publish-btn" form="create-checklist-form" hidden>Publish checklist</button>
+        </div>
+      </div>
+    </div>
+  </dialog>

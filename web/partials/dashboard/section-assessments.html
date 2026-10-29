@@ -1,0 +1,66 @@
+<section id="section-assessments" class="section-panel" aria-labelledby="assessments-heading" data-web-roles="head_doctor,psychometrician">
+          <h2 id="assessments-heading" class="visually-hidden">Assessment &amp; AI Insights</h2>
+          <div class="section-actions">
+            <button type="button" class="btn btn-primary" id="open-assessment-modal" data-open-modal="modal-assessment">+ New Assessment</button>
+          </div>
+          <p class="form-hint" id="submit-assessment-restricted" hidden>Only Psychometricians and Head Doctors can submit assessments.</p>
+
+          <div class="split-stats">
+            <div class="stat-card">
+              <span class="stat-value" id="submitted-assessments-count">0</span>
+              <span class="stat-label" id="submitted-assessments-label">Submitted assessments</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="pending-recs-count">0</span>
+              <span class="stat-label" id="pending-recs-label">Pending recommendations</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="assess-children-count">0</span>
+              <span class="stat-label" id="assess-children-label">Children available</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="assess-checklists-count">0</span>
+              <span class="stat-label" id="assess-checklists-label">Active checklists</span>
+            </div>
+          </div>
+
+          <div class="panel library-panel" id="submitted-assessments-panel">
+            <div class="panel-toolbar panel-toolbar--library">
+              <div class="panel-toolbar__start">
+                <span class="panel-toolbar__icon" aria-hidden="true">
+                  <img src="https://api.iconify.design/lucide/clipboard-list.svg?color=%230F4C4A" alt="" width="20" height="20">
+                </span>
+                <div>
+                  <h3 class="panel-title" id="submitted-assessments-heading">Assessment records</h3>
+                  <p class="panel-toolbar__hint">Grouped by child (A–Z) — expand a child to view their assessments</p>
+                </div>
+              </div>
+              <div class="panel-toolbar__end">
+                <label class="assessments-mine-filter" for="assessments-filter-mine">
+                  <input type="checkbox" id="assessments-filter-mine">
+                  <span>My submissions</span>
+                </label>
+                <span class="count-chip" id="submitted-assessments-toolbar-count" aria-live="polite">0</span>
+              </div>
+            </div>
+            <div class="assessments-filters" aria-label="Assessment record search">
+              <label class="registry-search assessments-search" for="assessments-search">
+                <img src="https://api.iconify.design/lucide/search.svg?color=%235C6775" alt="" width="16" height="16">
+                <span class="visually-hidden">Search assessment records</span>
+                <input type="search" id="assessments-search" placeholder="Search child, checklist, severity, or recorder…">
+              </label>
+            </div>
+            <div id="submitted-assessments-loading" class="loading">Loading assessments…</div>
+            <div id="submitted-assessments-alert" class="alert" hidden role="alert"></div>
+            <div id="submitted-assessments-empty" class="empty-state" hidden>
+              <h3>No submitted assessments yet</h3>
+              <p>Create a new assessment to see it listed here with checklist scores and AI recommendation status.</p>
+            </div>
+            <div class="assessment-groups" id="submitted-assessments-list" hidden></div>
+            <nav class="assessments-pagination" id="submitted-assessments-pagination" hidden aria-label="Assessment records pagination">
+              <button type="button" class="btn btn-secondary btn-sm" id="assessments-page-prev">Previous</button>
+              <p class="assessments-pagination__meta" id="assessments-page-meta">Page 1</p>
+              <button type="button" class="btn btn-secondary btn-sm" id="assessments-page-next">Next</button>
+            </nav>
+          </div>
+        </section>

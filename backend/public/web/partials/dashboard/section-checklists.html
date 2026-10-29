@@ -1,0 +1,36 @@
+<section id="section-checklists" class="section-panel" aria-labelledby="checklists-heading" data-web-roles="head_doctor,psychometrician">
+          <h2 id="checklists-heading" class="visually-hidden">Checklists Library</h2>
+          <div class="section-actions" id="checklists-create-actions">
+            <button type="button" class="btn btn-primary" id="open-checklist-modal" data-open-modal="modal-checklist">+ Create Checklist</button>
+          </div>
+
+          <div class="panel library-panel">
+            <div class="library-filters">
+              <label class="registry-search" for="checklists-search">
+                <img src="https://api.iconify.design/lucide/search.svg?color=%235C6775" alt="" width="16" height="16">
+                <span class="visually-hidden">Search checklists</span>
+                <input type="search" id="checklists-search" placeholder="Search checklists by name…">
+              </label>
+              <select id="checklists-filter-category" class="field-control" aria-label="Filter by category">
+                <option value="">All Categories</option>
+                <option value="Motor Skills">Motor Skills</option>
+                <option value="Social">Social</option>
+                <option value="Cognitive">Cognitive</option>
+                <option value="Behavioral">Behavioral</option>
+              </select>
+            </div>
+
+            <div id="checklists-loading" class="loading library-loading">Loading checklists…</div>
+            <div id="checklists-empty" class="empty-state" hidden>
+              <h3>No checklists</h3>
+              <p id="checklists-empty-copy">Create an assessment checklist to begin evaluations.</p>
+              <button type="button" class="btn btn-primary" id="empty-open-checklist" data-open-modal="modal-checklist">+ Create Checklist</button>
+            </div>
+            <div class="checklist-grid" id="checklists-list" hidden></div>
+            <nav class="list-pagination" id="checklists-pagination" hidden aria-label="Checklists pagination">
+              <button type="button" class="btn btn-secondary btn-sm" id="checklists-page-prev">Previous</button>
+              <p class="list-pagination__meta" id="checklists-page-meta">Page 1</p>
+              <button type="button" class="btn btn-secondary btn-sm" id="checklists-page-next">Next</button>
+            </nav>
+          </div>
+        </section>
