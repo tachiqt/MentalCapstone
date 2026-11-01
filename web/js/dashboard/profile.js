@@ -416,6 +416,14 @@
       </div>`;
 
     renderProfileProgressPane(report, { resetPages: true });
+    const documentsTab = SC.$('.profile-tab[data-profile-tab="documents"]');
+    if (documentsTab) documentsTab.hidden = !canManageChildren();
+    if (canManageChildren() && child.id) {
+      renderProfileDocumentsPane(child.id);
+    } else {
+      const docsPane = SC.$(`.profile-pane[data-profile-pane="documents"]`);
+      if (docsPane) docsPane.innerHTML = '';
+    }
     if (canManageChildren() && child.id) {
       loadDiagnosisHistory(child.id);
     }
@@ -509,6 +517,22 @@
     return String(value || '') === 'parent';
   }
 
+  function progressPhotosHtml(photos) {
+    const list = Array.isArray(photos) ? photos : [];
+    if (!list.length) return '';
+    return `
+      <div class="progress-photo-thumbs">
+        ${list
+          .map(
+            (photo) => `
+          <button type="button" class="progress-photo-thumb" data-auth-file="${escapeHtml(photo.download_path || '')}" data-file-name="${escapeHtml(photo.original_filename || 'photo')}" title="${escapeHtml(photo.original_filename || 'Photo')}">
+            <span class="progress-photo-thumb__label">${escapeHtml(photo.original_filename || 'Photo')}</span>
+          </button>`
+          )
+          .join('')}
+      </div>`;
+  }
+
   function teacherProgressCardHtml(p) {
     return `
       <article class="profile-item">
@@ -518,7 +542,106 @@
         </div>
         <p class="profile-item__meta">${escapeHtml(p.recorder?.name || 'Care team')}${p.milestone ? ` · ${escapeHtml(p.milestone)}` : ''}</p>
         <p class="profile-item__body">${escapeHtml(p.summary || p.milestone || 'No details')}</p>
+        ${progressPhotosHtml(p.photos)}
       </article>`;
+  }
+
+  const DOC_CATEGORY_LABELS = {
+    birth_certificate: 'Birth certificate',
+    pwd_id: 'PWD ID',
+    other: 'Other',
+  };
+
+  function documentCategoryLabel(category) {
+    return DOC_CATEGORY_LABELS[category] || String(category || 'Document').replace(/_/g, ' ');
+  }
+
+  function formatFileSize(bytes) {
+    const n = Number(bytes) || 0;
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+    return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  function isImageMime(mime, filename) {
+    if (String(mime || '').startsWith('image/')) return true;
+    return /\.(jpe?g|png)$/i.test(String(filename || ''));
+  }
+
+  function documentCardHtml(doc) {
+    const name = doc.title || doc.original_filename || 'Document';
+    const path = doc.download_path || '';
+    return `
+      <article class="profile-item" data-document-id="${doc.id || ''}">
+        <div class="profile-item__top">
+          <h5>${escapeHtml(name)}</h5>
+          <span class="badge badge-neutral">${escapeHtml(documentCategoryLabel(doc.category))}</span>
+        </div>
+        <p class="profile-item__meta">${escapeHtml(doc.original_filename || '')} · ${escapeHtml(formatFileSize(doc.size_bytes))} · ${escapeHtml(formatDate(doc.created_at))}</p>
+        <p class="profile-item__meta">Uploaded by ${escapeHtml(doc.uploader?.name || doc.uploader?.username || 'Staff')}</p>
+        <div class="profile-item__actions">
+          <button type="button" class="btn btn-secondary btn-sm" data-auth-file="${escapeHtml(path)}" data-file-name="${escapeHtml(doc.original_filename || name)}" data-preview="${isImageMime(doc.mime_type, doc.original_filename) ? 'image' : 'file'}">
+            ${isImageMime(doc.mime_type, doc.original_filename) ? 'Preview' : 'View / download'}
+          </button>
+          <label class="btn btn-secondary btn-sm">
+            Replace
+            <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" data-replace-document="${doc.id || ''}">
+          </label>
+          <button type="button" class="btn btn-secondary btn-sm" data-delete-document="${doc.id || ''}">Delete</button>
+        </div>
+      </article>`;
+  }
+
+  async function renderProfileDocumentsPane(childId) {
+    const pane = SC.$(`.profile-pane[data-profile-pane="documents"]`);
+    if (!pane) return;
+
+    if (!canManageChildren()) {
+      pane.innerHTML = `<div class="profile-block"><p class="profile-empty">Documents are available to facility administrators only.</p></div>`;
+      return;
+    }
+
+    pane.innerHTML = `<div class="profile-block"><p class="profile-empty">Loading documents…</p></div>`;
+    try {
+      const documents = await SmartCareAPI.get(`/children/${childId}/documents`);
+      const list = Array.isArray(documents) ? documents : [];
+      pane.innerHTML = `
+        <div class="profile-block">
+          <h4>Child documents</h4>
+          <p class="form-hint">Birth certificates, PWD IDs, and other records stay private. Max 10 MB · JPG, PNG, or PDF.</p>
+          <form id="profile-document-form" class="profile-document-form">
+            <div class="therapy-grid">
+              <div class="form-group">
+                <label for="profile-document-category">Category</label>
+                <select id="profile-document-category" class="field-control" required>
+                  <option value="birth_certificate">Birth certificate</option>
+                  <option value="pwd_id">PWD ID</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="profile-document-title">Title (optional)</label>
+                <input type="text" id="profile-document-title" class="field-control" maxlength="255" placeholder="e.g. 2024 PWD card">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="profile-document-file">File</label>
+              <input type="file" id="profile-document-file" class="field-control" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required>
+            </div>
+            <div class="profile-item__actions">
+              <button type="submit" class="btn btn-primary btn-sm" id="profile-document-submit">Upload document</button>
+            </div>
+          </form>
+        </div>
+        <div class="profile-block">
+          <h4>Uploaded files</h4>
+          <div class="profile-list" id="profile-documents-list">
+            ${list.length ? list.map(documentCardHtml).join('') : '<p class="profile-empty">No documents uploaded yet.</p>'}
+          </div>
+        </div>`;
+    } catch (err) {
+      pane.innerHTML = `<div class="profile-block"><p class="profile-empty">${escapeHtml(err.message || 'Could not load documents.')}</p></div>`;
+    }
   }
 
   function renderProfileProgressPane(report, { resetPages = false } = {}) {
@@ -739,6 +862,70 @@
       }
     });
 
+    SC.$('#child-profile-content')?.addEventListener('submit', async (e) => {
+      const form = e.target.closest('#profile-document-form');
+      if (!form) return;
+      e.preventDefault();
+      const childId = SC.state.childProfileId;
+      const alertEl = SC.$('#child-profile-alert');
+      const fileInput = SC.$('#profile-document-file');
+      const file = fileInput?.files?.[0];
+      const category = SC.$('#profile-document-category')?.value;
+      const title = (SC.$('#profile-document-title')?.value || '').trim();
+      hideAlert(alertEl);
+      if (!childId || !file || !category) {
+        showAlert(alertEl, 'Choose a category and file to upload.', 'error');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        showAlert(alertEl, 'Documents must be 10 MB or smaller.', 'error');
+        return;
+      }
+      const button = SC.$('#profile-document-submit');
+      try {
+        await SC.withBusy({ button, busyLabel: 'Uploading…' }, async () => {
+          const body = new FormData();
+          body.append('category', category);
+          if (title) body.append('title', title);
+          body.append('file', file);
+          await SmartCareAPI.post(`/children/${childId}/documents`, body);
+        });
+        showAlert(alertEl, 'Document uploaded.', 'success');
+        await renderProfileDocumentsPane(childId);
+        setProfileTab('documents');
+      } catch (err) {
+        showAlert(alertEl, err.message || 'Could not upload document.', 'error');
+      }
+    });
+
+    SC.$('#child-profile-content')?.addEventListener('change', async (e) => {
+      const input = e.target.closest('[data-replace-document]');
+      if (!input) return;
+      const documentId = input.getAttribute('data-replace-document');
+      const file = input.files?.[0];
+      const childId = SC.state.childProfileId;
+      const alertEl = SC.$('#child-profile-alert');
+      hideAlert(alertEl);
+      if (!documentId || !file || !childId) return;
+      if (file.size > 10 * 1024 * 1024) {
+        showAlert(alertEl, 'Documents must be 10 MB or smaller.', 'error');
+        input.value = '';
+        return;
+      }
+      try {
+        const body = new FormData();
+        body.append('file', file);
+        await SmartCareAPI.post(`/children/${childId}/documents/${documentId}`, body);
+        showAlert(alertEl, 'Document replaced.', 'success');
+        await renderProfileDocumentsPane(childId);
+        setProfileTab('documents');
+      } catch (err) {
+        showAlert(alertEl, err.message || 'Could not replace document.', 'error');
+      } finally {
+        input.value = '';
+      }
+    });
+
     SC.$('#child-profile-content')?.addEventListener('click', async (e) => {
       const pageBtn = e.target.closest('[data-profile-page]');
       if (pageBtn && !pageBtn.disabled) {
@@ -754,6 +941,42 @@
         } else if (listKey === 'ai-recs') {
           aiRecsPage += dir;
           if (report) renderProfileRecommendationsPane(report);
+        }
+        return;
+      }
+
+      const authFileBtn = e.target.closest('[data-auth-file]');
+      if (authFileBtn) {
+        const path = authFileBtn.getAttribute('data-auth-file');
+        const name = authFileBtn.getAttribute('data-file-name') || 'file';
+        const alertEl = SC.$('#child-profile-alert');
+        if (!path) return;
+        try {
+          const blobUrl = await SC.fetchAuthorizedBlobUrl(path);
+          window.open(blobUrl, '_blank', 'noopener');
+          window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+        } catch (err) {
+          showAlert(alertEl, err.message || `Could not open ${name}.`, 'error');
+        }
+        return;
+      }
+
+      const deleteDocBtn = e.target.closest('[data-delete-document]');
+      if (deleteDocBtn) {
+        const documentId = deleteDocBtn.getAttribute('data-delete-document');
+        const childId = SC.state.childProfileId;
+        const alertEl = SC.$('#child-profile-alert');
+        if (!documentId || !childId) return;
+        if (!window.confirm('Delete this document? This cannot be undone.')) return;
+        try {
+          await SC.withBusy({ button: deleteDocBtn, busyLabel: 'Deleting…' }, async () => {
+            await SmartCareAPI.delete(`/children/${childId}/documents/${documentId}`);
+          });
+          showAlert(alertEl, 'Document deleted.', 'success');
+          await renderProfileDocumentsPane(childId);
+          setProfileTab('documents');
+        } catch (err) {
+          showAlert(alertEl, err.message || 'Could not delete document.', 'error');
         }
         return;
       }
@@ -838,6 +1061,7 @@
   SC.renderChildProfile = renderChildProfile;
   SC.renderProfileProgressPane = renderProfileProgressPane;
   SC.renderProfileRecommendationsPane = renderProfileRecommendationsPane;
+  SC.renderProfileDocumentsPane = renderProfileDocumentsPane;
   SC.openChildProfile = openChildProfile;
   SC.reviewRecommendation = reviewRecommendation;
   SC.initChildProfile = initChildProfile;

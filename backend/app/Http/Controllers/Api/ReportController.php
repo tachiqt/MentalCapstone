@@ -436,7 +436,11 @@ class ReportController extends Controller
                 ->orderBy('scheduled_at')
                 ->limit(8)
                 ->get(),
-            'progress_records' => $child->progressRecords()->with('recorder:id,name,username,role')->latest()->limit(15)->get(),
+            'progress_records' => $child->progressRecords()
+                ->with(['recorder:id,name,username,role', 'photos'])
+                ->latest()
+                ->limit(15)
+                ->get(),
             'parent_feedback' => $parentFeedback,
             'medication_schedules' => $medicationSchedules,
             'medication_schedules_active' => $medicationSchedules->where('is_active', true)->count(),

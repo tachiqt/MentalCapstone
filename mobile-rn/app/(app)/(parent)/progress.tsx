@@ -36,6 +36,7 @@ import { AvatarChip } from '../../../components/parent/AvatarChip';
 import { Button } from '../../../components/ui/Button';
 import { BlurredModalBackdrop } from '../../../components/ui/BlurredModalBackdrop';
 import { SafeModalSheet } from '../../../components/ui/SafeModalSheet';
+import { ProgressPhotoGrid, ProgressPhoto } from '../../../components/ProgressPhotoGrid';
 import { alpha, colors, fonts, spacing, radii, shadows, layout } from '../../../lib/theme';
 
 type Child = {
@@ -54,6 +55,7 @@ type ProgressRecord = {
   milestone?: string;
   recorded_on?: string;
   child?: Child;
+  photos?: ProgressPhoto[];
 };
 
 type FeedbackItem = {
@@ -161,6 +163,11 @@ export default function ProgressScreen() {
   const barData = milestonesByChild(myRecords, childList);
   const sparkData = milestonesByWeek(myRecords);
   const hasMedLogs = medLogList.length > 0;
+  const careTeamPhotos = myRecords
+    .filter((r) => recordChildId(r) === selectedChildId)
+    .flatMap((r) => (Array.isArray(r.photos) ? r.photos : []))
+    .filter((p) => p?.download_path)
+    .slice(0, 12);
 
   if (loading) {
     return (
@@ -341,6 +348,14 @@ export default function ProgressScreen() {
             </View>
           )}
 
+          {careTeamPhotos.length > 0 ? (
+            <View style={styles.carePhotosBlock}>
+              <Text style={styles.carePhotosTitle}>Photos from the care team</Text>
+              <Text style={styles.carePhotosHint}>Shown here for viewing — no download needed.</Text>
+              <ProgressPhotoGrid photos={careTeamPhotos} />
+            </View>
+          ) : null}
+
           <Button
             label="Send feedback"
             icon="send-outline"
@@ -408,6 +423,13 @@ export default function ProgressScreen() {
                   </Text>
                 </View>
                 <Text style={styles.modalChildName}>{childName(childList[0])}</Text>
+              </View>
+            ) : null}
+
+            {careTeamPhotos.length > 0 ? (
+              <View style={styles.modalField}>
+                <Text style={styles.modalLabel}>Photos from the care team</Text>
+                <ProgressPhotoGrid photos={careTeamPhotos} />
               </View>
             ) : null}
 
@@ -674,6 +696,21 @@ const styles = StyleSheet.create({
     maxWidth: 260,
   },
   sendBtn: { marginTop: spacing.xs },
+  carePhotosBlock: {
+    marginTop: spacing.md,
+    gap: 4,
+  },
+  carePhotosTitle: {
+    fontFamily: fonts.headingSemi,
+    fontSize: 14,
+    color: colors.green900,
+  },
+  carePhotosHint: {
+    fontFamily: fonts.body,
+    fontSize: 12,
+    color: colors.textMuted,
+    marginBottom: 4,
+  },
   modalShell: { flex: 1, backgroundColor: 'rgba(8, 36, 34, 0.55)' },
   modalRoot: {
     flex: 1,

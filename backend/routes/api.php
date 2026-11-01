@@ -5,6 +5,9 @@ use App\Http\Controllers\Api\AssessmentController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ChecklistController;
 use App\Http\Controllers\Api\ChildController;
+use App\Http\Controllers\Api\ChildDocumentController;
+use App\Http\Controllers\Api\ChildGalleryController;
+use App\Http\Controllers\Api\GalleryAlbumController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\LandingStatsController;
 use App\Http\Controllers\Api\LearningMaterialController;
@@ -101,6 +104,24 @@ Route::prefix('v1')->group(function () {
             Route::patch('children/{child}/activate', [ChildController::class, 'activate']);
             Route::post('children/{child}/assign', [ChildController::class, 'assign']);
             Route::post('assignments', [ChildController::class, 'assignBatch']);
+
+            Route::get('children/{child}/documents', [ChildDocumentController::class, 'index']);
+            Route::post('children/{child}/documents', [ChildDocumentController::class, 'store']);
+            Route::get('children/{child}/documents/{document}', [ChildDocumentController::class, 'show']);
+            Route::post('children/{child}/documents/{document}', [ChildDocumentController::class, 'update']);
+            Route::put('children/{child}/documents/{document}', [ChildDocumentController::class, 'update']);
+            Route::delete('children/{child}/documents/{document}', [ChildDocumentController::class, 'destroy']);
+            Route::get('children/{child}/documents/{document}/file', [ChildDocumentController::class, 'file']);
+
+            Route::get('gallery/albums', [ChildGalleryController::class, 'albums']);
+            Route::get('gallery/albums/{child}', [ChildGalleryController::class, 'show'])->whereNumber('child');
+
+            Route::post('gallery/custom-albums', [GalleryAlbumController::class, 'store']);
+            Route::patch('gallery/custom-albums/{album}', [GalleryAlbumController::class, 'update']);
+            Route::delete('gallery/custom-albums/{album}', [GalleryAlbumController::class, 'destroy']);
+            Route::get('gallery/custom-albums/{album}/photos', [GalleryAlbumController::class, 'photos']);
+            Route::post('gallery/custom-albums/{album}/photos', [GalleryAlbumController::class, 'uploadPhotos']);
+            Route::get('gallery-photos/{photo}/file', [GalleryAlbumController::class, 'downloadPhoto']);
         });
 
         Route::middleware('role:head_doctor')->group(function () {
@@ -171,9 +192,12 @@ Route::prefix('v1')->group(function () {
 
         Route::get('children/{child}/progress', [ProgressController::class, 'index']);
         Route::get('progress', [ProgressController::class, 'all']);
+        Route::get('progress-photos/{photo}/file', [ProgressController::class, 'downloadPhoto']);
 
         Route::middleware('role:teacher,head_doctor,caretaker')->group(function () {
             Route::post('children/{child}/progress', [ProgressController::class, 'store']);
+            Route::post('children/{child}/progress/{progress}', [ProgressController::class, 'update']);
+            Route::put('children/{child}/progress/{progress}', [ProgressController::class, 'update']);
         });
 
         Route::get('children/{child}/parent-feedback', [ParentFeedbackController::class, 'index']);

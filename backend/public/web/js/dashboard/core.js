@@ -251,6 +251,27 @@ window.SmartCareApp = window.SmartCareApp || {};
     });
   };
 
+  /**
+   * Fetch a private API file with the Bearer token and return an object URL.
+   * Caller should revoke the URL when done (URL.revokeObjectURL).
+   */
+  SC.fetchAuthorizedBlobUrl = async function (path) {
+    const token = SmartCareAPI.getToken();
+    const base = SmartCareAPI.getBaseUrl();
+    const url = `${base}${path.startsWith('/') ? path : `/${path}`}`;
+    const response = await fetch(url, {
+      headers: {
+        Accept: '*/*',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Could not load file (${response.status})`);
+    }
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+  };
+
   SC.withBusy = async function (opts, fn) {
     const button = typeof opts?.button === 'string' ? SC.$(opts.button) : opts?.button;
     const overlay = typeof opts?.overlay === 'string' ? SC.$(opts.overlay) : opts?.overlay;

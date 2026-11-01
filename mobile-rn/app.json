@@ -29,7 +29,13 @@
       "@react-native-google-signin/google-signin",
       "expo-font",
       "expo-status-bar",
-      "expo-splash-screen"
+      "expo-splash-screen",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow SmartCare to attach progress photos for parents."
+        }
+      ]
     ],
     "extra": {
       "router": {},

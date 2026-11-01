@@ -9,8 +9,7 @@ backend/storage/framework/cache/*
 backend/storage/framework/sessions/*
 backend/storage/framework/views/*
 backend/bootstrap/cache/*.php
-mobile/.dart_tool/
-mobile/build/
+mobile/
 mobile-rn/node_modules/
 .idea/
 .vscode/
@@ -25,3 +24,15 @@ mobile-rn/node_modules/
 !**/.env.example
 backend/.env
 mobile-rn/.env
+
+# Spec Kit / AI workflow & design instruction artifacts
+.specify/
+design-system/
+specs/001-smartcare-platform/
+DESIGN.md
+PRODUCT.md
+docs/IMPECCABLE_PASS.md
+AGENTS.md
+**/AGENTS.md
+CLAUDE.md
+**/CLAUDE.md

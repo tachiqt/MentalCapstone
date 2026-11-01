@@ -72,6 +72,16 @@ class Child extends Model
         return $this->hasMany(ProgressRecord::class);
     }
 
+    public function documents(): HasMany
+    {
+        return $this->hasMany(ChildDocument::class)->orderByDesc('created_at');
+    }
+
+    public function galleryAlbums(): HasMany
+    {
+        return $this->hasMany(GalleryAlbum::class)->orderByDesc('updated_at');
+    }
+
     public function parentFeedback(): HasMany
     {
         return $this->hasMany(ParentFeedback::class);

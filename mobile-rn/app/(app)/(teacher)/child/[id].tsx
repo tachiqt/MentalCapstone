@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
+  Image,
   Modal,
   ScrollView,
   StyleSheet,
@@ -12,6 +13,7 @@ import {
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { api } from '../../../../lib/api';
 import { childName, formatDate, initials } from '../../../../lib/format';
@@ -24,8 +26,19 @@ import { SkeletonCard } from '../../../../components/ui/SkeletonCard';
 import { EmptyState } from '../../../../components/EmptyState';
 import { BlurredModalBackdrop } from '../../../../components/ui/BlurredModalBackdrop';
 import { SafeModalSheet } from '../../../../components/ui/SafeModalSheet';
+import { ProgressPhotoGrid, ProgressPhoto } from '../../../../components/ProgressPhotoGrid';
 import { LearningMaterial } from '../../../../lib/materials';
 import { alpha, colors, fonts, spacing, radii, shadows, layout } from '../../../../lib/theme';
+
+const MAX_PHOTOS = 6;
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+
+type DraftPhoto = {
+  uri: string;
+  name: string;
+  type: string;
+  fileSize?: number | null;
+};
 
 type ChildDetail = {
   id: number;
@@ -45,6 +58,7 @@ type ProgressRecord = {
   milestone?: string;
   recorded_on?: string;
   recorder?: { name?: string };
+  photos?: ProgressPhoto[];
 };
 
 type TherapyPlan = {
@@ -83,6 +97,7 @@ export default function TeacherChildDetailScreen() {
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
   const [milestone, setMilestone] = useState('');
+  const [draftPhotos, setDraftPhotos] = useState<DraftPhoto[]>([]);
 
   const [planComposerOpen, setPlanComposerOpen] = useState(false);
   const [editingPlanId, setEditingPlanId] = useState<number | null>(null);
@@ -127,8 +142,35 @@ export default function TeacherChildDetailScreen() {
   });
 
   const createProgress = useMutation({
-    mutationFn: (body: { title: string; summary?: string; milestone?: string }) =>
-      api(`/children/${childId}/progress`, { method: 'POST', body }),
+    mutationFn: async (payload: {
+      title: string;
+      summary?: string;
+      milestone?: string;
+      photos: DraftPhoto[];
+    }) => {
+      if (!payload.photos.length) {
+        return api(`/children/${childId}/progress`, {
+          method: 'POST',
+          body: {
+            title: payload.title,
+            summary: payload.summary,
+            milestone: payload.milestone,
+          },
+        });
+      }
+      const body = new FormData();
+      body.append('title', payload.title);
+      if (payload.summary) body.append('summary', payload.summary);
+      if (payload.milestone) body.append('milestone', payload.milestone);
+      payload.photos.forEach((photo, index) => {
+        body.append('photos[]', {
+          uri: photo.uri,
+          name: photo.name || `photo-${index + 1}.jpg`,
+          type: photo.type || 'image/jpeg',
+        } as any);
+      });
+      return api(`/children/${childId}/progress`, { method: 'POST', body });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['child-progress', childId] });
       queryClient.invalidateQueries({ queryKey: ['progress'] });
@@ -136,10 +178,52 @@ export default function TeacherChildDetailScreen() {
       setTitle('');
       setSummary('');
       setMilestone('');
+      setDraftPhotos([]);
       setTab('progress');
     },
     onError: (err: Error) => Alert.alert('Could not save', err.message),
   });
+
+  async function pickProgressPhotos() {
+    const remaining = MAX_PHOTOS - draftPhotos.length;
+    if (remaining <= 0) {
+      Alert.alert('Photo limit', `You can attach at most ${MAX_PHOTOS} photos.`);
+      return;
+    }
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission needed', 'Allow photo library access to attach images.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      selectionLimit: remaining,
+      quality: 0.85,
+    });
+    if (result.canceled) return;
+    const next: DraftPhoto[] = [];
+    for (const asset of result.assets || []) {
+      const size = asset.fileSize ?? null;
+      if (size != null && size > MAX_PHOTO_BYTES) {
+        Alert.alert('File too large', `${asset.fileName || 'Photo'} exceeds the 5 MB limit.`);
+        continue;
+      }
+      const mime = asset.mimeType || 'image/jpeg';
+      if (!/^image\/(jpeg|jpg|png)$/i.test(mime)) {
+        Alert.alert('Unsupported type', 'Use JPG or PNG photos only.');
+        continue;
+      }
+      next.push({
+        uri: asset.uri,
+        name: asset.fileName || `photo-${Date.now()}.jpg`,
+        type: mime,
+        fileSize: size,
+      });
+    }
+    if (!next.length) return;
+    setDraftPhotos((prev) => [...prev, ...next].slice(0, MAX_PHOTOS));
+  }
 
   const savePlan = useMutation({
     mutationFn: (body: Record<string, unknown>) =>
@@ -405,7 +489,9 @@ export default function TeacherChildDetailScreen() {
                     isFirst={index === 0}
                     isLast={index === records.length - 1}
                     badge={item.milestone ? <Badge label={item.milestone} tone="accent" /> : undefined}
-                  />
+                  >
+                    <ProgressPhotoGrid photos={item.photos} />
+                  </TimelineItem>
                 ))}
               </Timeline>
             )}
@@ -619,8 +705,36 @@ export default function TeacherChildDetailScreen() {
                 placeholderTextColor={colors.textMuted}
                 multiline
               />
+              <Text style={styles.fieldLabel}>Photos (optional)</Text>
+              <Text style={styles.sectionHint}>JPG/PNG · max 5 MB each · up to {MAX_PHOTOS}</Text>
+              <View style={styles.photoDraftRow}>
+                {draftPhotos.map((photo, index) => (
+                  <View key={`${photo.uri}-${index}`} style={styles.photoDraft}>
+                    <Image source={{ uri: photo.uri }} style={styles.photoDraftImage} />
+                    <TouchableOpacity
+                      style={styles.photoDraftRemove}
+                      onPress={() => setDraftPhotos((prev) => prev.filter((_, i) => i !== index))}
+                      accessibilityLabel="Remove photo"
+                    >
+                      <Ionicons name="close" size={14} color={colors.white} />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                {draftPhotos.length < MAX_PHOTOS ? (
+                  <TouchableOpacity style={styles.photoAddBtn} onPress={pickProgressPhotos}>
+                    <Ionicons name="image-outline" size={22} color={colors.primary} />
+                    <Text style={styles.photoAddText}>Add</Text>
+                  </TouchableOpacity>
+                ) : null}
+              </View>
               <View style={styles.modalActions}>
-                <TouchableOpacity style={styles.modalCancel} onPress={() => setComposerOpen(false)}>
+                <TouchableOpacity
+                  style={styles.modalCancel}
+                  onPress={() => {
+                    setComposerOpen(false);
+                    setDraftPhotos([]);
+                  }}
+                >
                   <Text style={styles.modalCancelText}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -631,6 +745,7 @@ export default function TeacherChildDetailScreen() {
                       title: title.trim(),
                       summary: summary.trim() || undefined,
                       milestone: milestone.trim() || undefined,
+                      photos: draftPhotos,
                     })
                   }
                 >
@@ -1046,4 +1161,42 @@ const styles = StyleSheet.create({
   },
   modalSaveDisabled: { opacity: 0.5 },
   modalSaveText: { fontFamily: fonts.bodyMedium, fontSize: 15, color: colors.white },
+  photoDraftRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  photoDraft: {
+    width: 72,
+    height: 72,
+    borderRadius: radii.md,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  photoDraftImage: { width: '100%', height: '100%' },
+  photoDraftRemove: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(15,23,22,0.72)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  photoAddBtn: {
+    width: 72,
+    height: 72,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    borderColor: alpha.a16,
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    backgroundColor: colors.tint100,
+  },
+  photoAddText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.primary },
 });

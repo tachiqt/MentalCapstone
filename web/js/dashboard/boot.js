@@ -11,7 +11,7 @@
   const PARTIALS = [
     'section-overview.html','section-children.html','section-checklists.html','section-assessments.html',
     'section-reports.html','section-staff.html','section-therapy.html','section-medication.html',
-    'section-materials.html','section-settings.html','section-help.html','section-notifications.html',
+    'section-materials.html','section-gallery.html','section-settings.html','section-help.html','section-notifications.html',
     'modal-child.html','modal-child-status.html','modal-checklist.html','modal-checklist-view.html',
     'modal-assessment.html','modal-assessment-view.html','modal-child-profile.html',
     'modal-staff.html','modal-therapy.html','modal-medication.html','modal-materials.html',
@@ -120,6 +120,7 @@
   SC.initTherapy && SC.initTherapy();
   SC.initMedication && SC.initMedication();
   SC.initMaterials && SC.initMaterials();
+  SC.initGallery && SC.initGallery();
   SC.initChildrenSearch && SC.initChildrenSearch();
   SC.initAssign && SC.initAssign();
 

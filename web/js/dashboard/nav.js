@@ -49,6 +49,10 @@
       title: 'Resource Library',
       subtitle: 'Learning materials for therapy support',
     },
+    gallery: {
+      title: 'Gallery',
+      subtitle: 'Photo Albums of the facility',
+    },
     settings: {
       title: 'Settings',
       subtitle: 'Profile, credentials, and facility defaults',
@@ -170,6 +174,7 @@
     if (section === 'therapy') loading = Promise.resolve(loadTherapySessions());
     if (section === 'medication') loading = Promise.resolve(loadMedicationSchedules());
     if (section === 'materials') loading = Promise.resolve(loadMaterials());
+    if (section === 'gallery') loading = Promise.resolve(SC.loadGallery?.());
     if (section === 'settings') loading = Promise.resolve(SC.loadSettings?.());
     if (section === 'notifications') loading = Promise.resolve(SC.loadNotificationsPage?.());
     return Promise.resolve(loading).then(() => true);
@@ -286,10 +291,18 @@
 
     SC.$$('.nav-link[data-section]').forEach((link) => {
       link.addEventListener('click', (e) => {
-        e.preventDefault();
         const section = link.dataset.section;
-        if (!SC.canAccessSection?.(section)) return;
+        if (!sectionMeta[section] || !SC.canAccessSection?.(section)) {
+          e.preventDefault();
+          return;
+        }
         setMobileNavOpen(false);
+        // Cross-page: follow the real href so a stale cached nav.js cannot
+        // swallow clicks for newly added sections (e.g. Gallery).
+        if (currentPage() !== sectionPage(section)) {
+          return;
+        }
+        e.preventDefault();
         SC.navigateToSection?.(section);
       });
     });

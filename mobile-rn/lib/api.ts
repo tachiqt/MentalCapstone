@@ -42,18 +42,21 @@ export async function api<T = any>(
 ): Promise<T> {
   const token = await getToken();
   const { method = 'GET', body, headers = {} } = options;
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
 
   let res: Response;
   try {
     res = await fetch(`${API_BASE_URL}${endpoint}`, {
       method,
       headers: {
-        'Content-Type': 'application/json',
         Accept: 'application/json',
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...headers,
       },
-      ...(body ? { body: JSON.stringify(body) } : {}),
+      ...(body
+        ? { body: isFormData ? body : JSON.stringify(body) }
+        : {}),
     });
   } catch {
     throw new Error('Cannot reach SmartCare server. Make sure the backend is running on port 8000.');
@@ -64,5 +67,15 @@ export async function api<T = any>(
     throw new ApiError(parseApiError(error, res.status), res.status, error);
   }
 
+  if (res.status === 204) {
+    return undefined as T;
+  }
+
   return res.json();
+}
+
+/** Absolute API URL for a relative path like `/progress-photos/1/file`. */
+export function apiUrl(path: string): string {
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  return `${API_BASE_URL}${normalized}`;
 }

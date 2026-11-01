@@ -72,6 +72,22 @@ return [
             'metadata' => ['cacheControl' => 'public,max-age=86400'],
         ],
 
+        /*
+         * Sensitive child documents / progress photos. No public IAM on this bucket.
+         * Served only through authenticated API download endpoints.
+         */
+        'gcs_private' => [
+            'driver' => 'gcs',
+            'project_id' => env('GOOGLE_CLOUD_PROJECT_ID'),
+            'key_file_path' => env('GOOGLE_CLOUD_KEY_FILE'),
+            'bucket' => env('GOOGLE_CLOUD_PRIVATE_STORAGE_BUCKET', env('GOOGLE_CLOUD_STORAGE_BUCKET')),
+            'path_prefix' => env('GOOGLE_CLOUD_PRIVATE_STORAGE_PATH_PREFIX', 'smartcare-private'),
+            'storage_api_uri' => env('GOOGLE_CLOUD_STORAGE_API_URI'),
+            'visibility' => 'private',
+            'visibility_handler' => \League\Flysystem\GoogleCloudStorage\UniformBucketLevelAccessVisibility::class,
+            'metadata' => ['cacheControl' => 'private, no-store'],
+        ],
+
     ],
 
     /*
@@ -93,6 +109,18 @@ return [
     */
 
     'media_disk' => env('MEDIA_DISK', env('AVATARS_DISK', 'gcs')),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Private media disk (child documents, progress photos)
+    |--------------------------------------------------------------------------
+    |
+    | Sensitive files must never be publicly URL-addressable. Serve them only
+    | through authenticated API download endpoints.
+    |
+    */
+
+    'private_media_disk' => env('PRIVATE_MEDIA_DISK', 'local'),
 
     /*
     |--------------------------------------------------------------------------

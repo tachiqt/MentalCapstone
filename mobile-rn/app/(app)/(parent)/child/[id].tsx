@@ -15,6 +15,7 @@ import { Timeline, TimelineItem } from '../../../../components/ui/Timeline';
 import { ProgressRing } from '../../../../components/parent/ProgressRing';
 import { SkeletonCard } from '../../../../components/ui/SkeletonCard';
 import { EmptyState } from '../../../../components/EmptyState';
+import { ProgressPhotoGrid, ProgressPhoto } from '../../../../components/ProgressPhotoGrid';
 import { alpha, colors, fonts, spacing, radii, shadows, layout } from '../../../../lib/theme';
 
 const PAGE_SIZE = 10;
@@ -36,6 +37,7 @@ type ProgressRecord = {
   summary?: string;
   milestone?: string;
   recorded_on?: string;
+  photos?: ProgressPhoto[];
 };
 
 type MedLog = {
@@ -367,7 +369,9 @@ export default function ChildProfileScreen() {
                     isFirst={index === 0}
                     isLast={index === progressPaging.slice.length - 1}
                     badge={item.milestone ? <Badge label={item.milestone} tone="neutral" /> : undefined}
-                  />
+                  >
+                    <ProgressPhotoGrid photos={item.photos} />
+                  </TimelineItem>
                 ))}
               </Timeline>
               <Pager
