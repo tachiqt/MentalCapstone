@@ -43,7 +43,9 @@ function nativeModule(): typeof GoogleSigninModule | null {
 }
 
 /** True only when the ID is set *and* the native module is in this binary. */
-export const isGoogleAvailable = isGoogleConfigured && nativeModule() !== null;
+export function isGoogleAvailable(): boolean {
+  return isGoogleConfigured && nativeModule() !== null;
+}
 
 let configured = false;
 

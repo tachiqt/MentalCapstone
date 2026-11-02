@@ -17,6 +17,7 @@ import {
 } from '@expo-google-fonts/noto-sans';
 import { AuthProvider } from '../lib/auth';
 import { queryClient } from '../lib/query-client';
+import { setupReactQueryNativeLifecycle, useAutoRefreshQueries } from '../lib/query-focus';
 import { loadAppConfig } from '../lib/app-config';
 import { colors } from '../lib/theme';
 import { StatusBar } from 'expo-status-bar';
@@ -25,6 +26,12 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 // Hold the native splash until the faces are in memory. Without this the first
 // frame paints in the platform sans and every heading visibly reflows.
 SplashScreen.preventAutoHideAsync().catch(() => {});
+setupReactQueryNativeLifecycle();
+
+function AutoRefreshBridge() {
+  useAutoRefreshQueries();
+  return null;
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -51,9 +58,10 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <KeyboardProvider>
+      <KeyboardProvider preload={false}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
+            <AutoRefreshBridge />
             <StatusBar style="dark" />
             <View style={{ flex: 1, backgroundColor: colors.background }} onLayout={onReady}>
               <Slot />

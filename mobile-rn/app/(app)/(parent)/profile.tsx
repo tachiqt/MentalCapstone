@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -10,6 +11,7 @@ import { UserAvatar } from '../../../components/ui/UserAvatar';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { SectionHeader } from '../../../components/ui/SectionHeader';
+import { ChangePasswordModal } from '../../../components/ChangePasswordModal';
 import { alpha, colors, fonts, spacing, radii, shadows, layout } from '../../../lib/theme';
 
 type Child = { id: number };
@@ -43,6 +45,7 @@ function MenuRow({
 export default function ParentProfileScreen() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const [passwordOpen, setPasswordOpen] = useState(false);
 
   const { data: children } = useQuery({
     queryKey: ['children'],
@@ -88,6 +91,12 @@ export default function ParentProfileScreen() {
         <SectionHeader title="Account" />
         <View style={styles.menuGroup}>
           <MenuRow
+            icon="lock-closed-outline"
+            label="Change password"
+            description="Update your sign-in password"
+            onPress={() => setPasswordOpen(true)}
+          />
+          <MenuRow
             icon="notifications-outline"
             label="Notifications"
             description="Alerts and care updates"
@@ -113,6 +122,8 @@ export default function ParentProfileScreen() {
         <Button label="Sign Out" variant="danger" onPress={handleLogout} style={styles.logout} />
         <Text style={styles.version}>SmartCare v{appVersion}</Text>
       </ScrollView>
+
+      <ChangePasswordModal visible={passwordOpen} onClose={() => setPasswordOpen(false)} />
     </Screen>
   );
 }

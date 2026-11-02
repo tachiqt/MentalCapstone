@@ -2,7 +2,6 @@ import { Redirect, Slot } from 'expo-router';
 import { useAuth } from '../../lib/auth';
 import { View, ActivityIndicator } from 'react-native';
 import { colors } from '../../lib/theme';
-import { BlurTargetProvider } from '../../components/ui/BlurTargetProvider';
 
 export default function AppLayout() {
   const { user, loading } = useAuth();
@@ -17,9 +16,5 @@ export default function AppLayout() {
 
   if (!user) return <Redirect href="/(auth)/login" />;
 
-  return (
-    <BlurTargetProvider>
-      <Slot />
-    </BlurTargetProvider>
-  );
+  return <Slot />;
 }

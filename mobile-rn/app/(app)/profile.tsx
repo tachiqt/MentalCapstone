@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -9,6 +10,7 @@ import { ScreenHeader } from '../../components/ui/ScreenHeader';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { SectionHeader } from '../../components/ui/SectionHeader';
+import { ChangePasswordModal } from '../../components/ChangePasswordModal';
 import { alpha, colors, fonts, spacing, radii, shadows, layout } from '../../lib/theme';
 
 function MenuRow({
@@ -39,6 +41,7 @@ function MenuRow({
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const appVersion = Constants.expoConfig?.version || '1.0.0';
 
   const handleLogout = async () => {
@@ -66,6 +69,12 @@ export default function ProfileScreen() {
         <SectionHeader title="Account" />
         <View style={styles.menuGroup}>
           <MenuRow
+            icon="lock-closed-outline"
+            label="Change password"
+            description="Update your sign-in password"
+            onPress={() => setPasswordOpen(true)}
+          />
+          <MenuRow
             icon="notifications-outline"
             label="Notifications"
             description="Alerts and care updates"
@@ -91,6 +100,8 @@ export default function ProfileScreen() {
         <Button label="Sign Out" variant="danger" onPress={handleLogout} style={styles.logout} />
         <Text style={styles.version}>SmartCare v{appVersion}</Text>
       </ScrollView>
+
+      <ChangePasswordModal visible={passwordOpen} onClose={() => setPasswordOpen(false)} />
     </Screen>
   );
 }
