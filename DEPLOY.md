@@ -16,10 +16,10 @@ For the **full step-by-step guide** (local + mobile + GCP), open **[README.md](R
 ```powershell
 cd path\to\MentalCapstone
 gcloud auth login
-gcloud builds submit --config=cloudbuild.yaml --substitutions=_TAG=v8 --project=agile-team-509312-u8
+gcloud builds submit --config=cloudbuild.yaml --substitutions=_TAG=v10 --project=agile-team-509312-u8
 ```
 
-Use a new `_TAG` each time (`v8`, `v9`, …).  
+Use a new `_TAG` each time (`v9`, `v10`, …).  
 If you only changed a Secret Manager value, you still need a redeploy so Cloud Run loads the new version.
 
 ## Seed demo data on production (optional)

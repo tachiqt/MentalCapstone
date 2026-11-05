@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -95,9 +95,19 @@ function isToday(value?: string | null): boolean {
 export default function ProgressScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const openingChildRef = useRef(false);
   const [message, setMessage] = useState('');
   const [feedbackChildId, setFeedbackChildId] = useState<number | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
+
+  const openChild = (id: number) => {
+    if (openingChildRef.current) return;
+    openingChildRef.current = true;
+    router.push(`/(app)/(parent)/child/${id}`);
+    setTimeout(() => {
+      openingChildRef.current = false;
+    }, 600);
+  };
 
   const { data: children, isLoading: l1, isError: e1, refetch: r1 } = useQuery({
     queryKey: ['children'],
@@ -278,7 +288,7 @@ export default function ProgressScreen() {
               latestDate={latest ? formatDate(latest.recorded_on, 'medium') : undefined}
               latestMilestone={latest?.milestone}
               milestoneCount={childRecords.length}
-              onPress={() => router.push(`/(app)/(parent)/child/${child.id}`)}
+              onPress={() => openChild(child.id)}
             />
           );
         })}

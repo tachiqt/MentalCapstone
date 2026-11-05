@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\User;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Laravel\Sanctum\Sanctum;
@@ -18,6 +19,7 @@ class EmailVerificationTest extends TestCase
     public function test_head_doctor_create_user_sends_verification_email(): void
     {
         Notification::fake();
+        config(['app.debug' => false]);
 
         $head = User::factory()->create([
             'role' => UserRole::HeadDoctor,
@@ -34,6 +36,8 @@ class EmailVerificationTest extends TestCase
             'role' => UserRole::Teacher->value,
         ])->assertCreated()
             ->assertJsonPath('role', UserRole::Teacher->value)
+            ->assertJsonPath('mail_sent', true)
+            ->assertJsonMissing(['verification_url'])
             ->assertJsonFragment(['message' => 'Account created. A verification email was sent to teacher@smartcare.local.']);
 
         $user = User::where('email', 'teacher@smartcare.local')->firstOrFail();
@@ -41,8 +45,145 @@ class EmailVerificationTest extends TestCase
         Notification::assertSentTo($user, VerifyEmailNotification::class);
     }
 
+    public function test_duplicate_active_account_returns_already_registered(): void
+    {
+        Notification::fake();
+
+        $head = User::factory()->create([
+            'role' => UserRole::HeadDoctor,
+            'status' => 'active',
+        ]);
+        User::factory()->create([
+            'email' => 'taken@smartcare.local',
+            'username' => 'taken_user',
+            'role' => UserRole::Teacher,
+            'status' => 'active',
+        ]);
+        Sanctum::actingAs($head);
+
+        $this->postJson('/api/v1/users', [
+            'name' => 'Another Teacher',
+            'email' => 'taken@smartcare.local',
+            'username' => 'taken_user',
+            'password' => 'Password1',
+            'password_confirmation' => 'Password1',
+            'role' => UserRole::Teacher->value,
+        ])->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_create_user_mail_failure_keeps_account_without_public_url(): void
+    {
+        config([
+            'app.debug' => false,
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp.host' => '127.0.0.1',
+            'mail.mailers.smtp.port' => 9,
+            'mail.mailers.smtp.timeout' => 1,
+        ]);
+
+        $head = User::factory()->create([
+            'role' => UserRole::HeadDoctor,
+            'status' => 'active',
+        ]);
+        Sanctum::actingAs($head);
+
+        $response = $this->postJson('/api/v1/users', [
+            'name' => 'Offline Teacher',
+            'email' => 'offline.teacher@smartcare.local',
+            'username' => 'offline_teacher',
+            'password' => 'Password1',
+            'password_confirmation' => 'Password1',
+            'role' => UserRole::Teacher->value,
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('mail_sent', false)
+            ->assertJsonPath('can_resend', true)
+            ->assertJsonMissing(['verification_url']);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'offline.teacher@smartcare.local',
+            'username' => 'offline_teacher',
+        ]);
+
+        $this->postJson('/api/v1/users', [
+            'name' => 'Offline Teacher Again',
+            'email' => 'offline.teacher@smartcare.local',
+            'username' => 'offline_teacher',
+            'password' => 'Password1',
+            'password_confirmation' => 'Password1',
+            'role' => UserRole::Teacher->value,
+        ])->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
+    }
+
+    public function test_soft_deleted_account_restore_sends_verification(): void
+    {
+        Notification::fake();
+        config(['app.debug' => false]);
+
+        $head = User::factory()->create([
+            'role' => UserRole::HeadDoctor,
+            'status' => 'active',
+        ]);
+        $deleted = User::factory()->create([
+            'email' => 'restored@smartcare.local',
+            'username' => 'restored_user',
+            'role' => UserRole::Teacher,
+            'status' => 'active',
+        ]);
+        $deleted->delete();
+        Sanctum::actingAs($head);
+
+        $this->postJson('/api/v1/users', [
+            'name' => 'Restored Teacher',
+            'email' => 'restored@smartcare.local',
+            'username' => 'restored_user',
+            'password' => 'Password1',
+            'password_confirmation' => 'Password1',
+            'role' => UserRole::Teacher->value,
+        ])->assertCreated()
+            ->assertJsonPath('mail_sent', true)
+            ->assertJsonMissing(['verification_url']);
+
+        Notification::assertSentTo(
+            User::where('email', 'restored@smartcare.local')->firstOrFail(),
+            VerifyEmailNotification::class
+        );
+    }
+
+    public function test_head_doctor_resend_verification_is_rate_limited(): void
+    {
+        Notification::fake();
+        config(['app.debug' => false]);
+
+        $head = User::factory()->create([
+            'role' => UserRole::HeadDoctor,
+            'status' => 'active',
+        ]);
+        $user = User::factory()->unverified()->create([
+            'role' => UserRole::Teacher,
+            'status' => 'active',
+        ]);
+        Sanctum::actingAs($head);
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->postJson("/api/v1/users/{$user->id}/resend-verification")
+                ->assertOk()
+                ->assertJsonMissing(['verification_url']);
+        }
+
+        $this->postJson("/api/v1/users/{$user->id}/resend-verification")
+            ->assertStatus(429);
+    }
+
     public function test_unverified_user_cannot_login(): void
     {
+        Notification::fake();
+
         $user = User::factory()->unverified()->create([
             'username' => 'unverified_teacher',
             'role' => UserRole::Teacher,
@@ -51,7 +192,7 @@ class EmailVerificationTest extends TestCase
         ]);
 
         // The mobile app keys off `reason` to open its resend screen, so the
-        // codes matter more than the sentence.
+        // codes matter more than the sentence. Login also mails a fresh link.
         $this->postJson('/api/v1/login', [
             'username' => 'unverified_teacher',
             'password' => 'password',
@@ -59,7 +200,10 @@ class EmailVerificationTest extends TestCase
         ])->assertForbidden()
             ->assertJsonPath('reason', 'email_unverified')
             ->assertJsonPath('email', $user->email)
+            ->assertJsonPath('mail_sent', true)
             ->assertJsonPath('can_resend', true);
+
+        Notification::assertSentTo($user, VerifyEmailNotification::class);
     }
 
     public function test_verified_user_can_login(): void
@@ -99,6 +243,7 @@ class EmailVerificationTest extends TestCase
     public function test_profile_email_change_requires_reverification(): void
     {
         Notification::fake();
+        config(['app.debug' => false]);
 
         $user = User::factory()->create([
             'email' => 'old@smartcare.local',
@@ -117,7 +262,9 @@ class EmailVerificationTest extends TestCase
         ])->assertOk()
             ->assertJsonPath('email_changed', true)
             ->assertJsonPath('user.email', 'new@smartcare.local')
-            ->assertJsonStructure(['verification_url', 'expires_minutes', 'mail_sent']);
+            ->assertJsonPath('mail_sent', true)
+            ->assertJsonStructure(['expires_minutes', 'mail_sent'])
+            ->assertJsonMissing(['verification_url']);
 
         $fresh = $user->fresh();
         $this->assertNull($fresh->email_verified_at);
@@ -127,9 +274,15 @@ class EmailVerificationTest extends TestCase
 
     public function test_google_login_does_not_create_new_users(): void
     {
+        Http::fake([
+            'oauth2.googleapis.com/*' => Http::response(['error' => 'invalid_token'], 400),
+        ]);
+
         $this->postJson('/api/v1/auth/google', [
             'id_token' => 'fake-token',
             'client' => 'mobile',
         ])->assertStatus(401);
+
+        $this->assertDatabaseCount('users', 0);
     }
 }

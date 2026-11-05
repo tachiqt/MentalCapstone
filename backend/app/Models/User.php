@@ -80,7 +80,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function trySendEmailVerificationNotification(): bool
     {
         $attempts = 0;
-        $maxAttempts = 2;
+        $maxAttempts = 3;
         $lastError = null;
 
         while ($attempts < $maxAttempts) {
@@ -96,10 +96,13 @@ class User extends Authenticatable implements MustVerifyEmail
                     'email' => $this->email,
                     'attempt' => $attempts,
                     'mailer' => config('mail.default'),
+                    'from' => config('mail.from.address'),
+                    'resend_configured' => filled(config('services.resend.key')),
+                    'exception' => $e::class,
                     'error' => $e->getMessage(),
                 ]);
                 if ($attempts < $maxAttempts) {
-                    usleep(400_000);
+                    usleep(500_000);
                 }
             }
         }

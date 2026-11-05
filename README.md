@@ -407,8 +407,8 @@ For a new project, create these first:
 | `smartcare-db-password` | Database password |
 | `smartcare-openai-key` | OpenAI API key |
 | `smartcare-google-client-id` | Google Sign-In client ID |
-| `smartcare-mail-username` | Gmail / SMTP username (also used as from-address) |
-| `smartcare-mail-password` | Gmail app password / SMTP password |
+| `smartcare-resend-key` | Resend API key (`re_…`) for `RESEND_KEY` |
+| `smartcare-mail-from` | Verified Resend from-address (e.g. `noreply@yourdomain.com`) |
 
 ## C3. Update a secret (example: OpenAI key)
 
@@ -569,7 +569,26 @@ That is why `php artisan storage:link` matters locally for public uploads.
 | Environment | What happens |
 |-------------|--------------|
 | Local (`MAIL_MAILER=log`) | Email is written to `backend/storage/logs/laravel.log` — open that file and copy the verification URL |
-| Production | Real email via Gmail SMTP using Secret Manager credentials |
+| Production (`MAIL_MAILER=resend`) | Real email via [Resend](https://resend.com) using Secret Manager (`smartcare-resend-key` + `smartcare-mail-from`) |
+
+### Resend setup (production)
+
+1. Create a Resend account and verify your sending domain (DNS records in the Resend dashboard).
+2. Create an API key and a from-address on that domain (e.g. `noreply@yourdomain.com`).
+3. Store them in Secret Manager, then redeploy:
+
+```powershell
+# API key only in the file (no quotes / blank lines)
+gcloud secrets create smartcare-resend-key --data-file=path\to\resend-key.txt --project=agile-team-509312-u8
+# Or update an existing secret:
+gcloud secrets versions add smartcare-resend-key --data-file=path\to\resend-key.txt --project=agile-team-509312-u8
+
+# From-address (plain text file containing only the email)
+gcloud secrets create smartcare-mail-from --data-file=path\to\mail-from.txt --project=agile-team-509312-u8
+gcloud secrets versions add smartcare-mail-from --data-file=path\to\mail-from.txt --project=agile-team-509312-u8
+```
+
+Until the domain is verified in Resend, verification emails will keep failing with `mail_sent: false` even though the API returns HTTP 200.
 
 ---
 

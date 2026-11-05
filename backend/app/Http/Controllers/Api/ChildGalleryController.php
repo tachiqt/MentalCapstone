@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Child;
 use App\Models\ChildDocument;
 use App\Models\GalleryAlbum;
+use App\Models\GalleryPhoto;
 use App\Models\ProgressPhoto;
+use App\Models\User;
+use App\Services\MediaStorage;
 use App\Support\ChildAccess;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,6 +18,10 @@ use Illuminate\Support\Collection;
 class ChildGalleryController extends Controller
 {
     public const PER_PAGE = 20;
+
+    public const MAX_PHOTOS_PER_REQUEST = 12;
+
+    public function __construct(private MediaStorage $media) {}
 
     public function albums(Request $request): JsonResponse
     {
@@ -45,6 +52,7 @@ class ChildGalleryController extends Controller
         })->values();
 
         $custom = GalleryAlbum::query()
+            ->whereNull('child_id')
             ->withCount('photos')
             ->orderByDesc('updated_at')
             ->get()
@@ -101,6 +109,70 @@ class ChildGalleryController extends Controller
         ]);
     }
 
+    public function uploadPhotos(Request $request, int $child): JsonResponse
+    {
+        $record = ChildAccess::findOrFail($request->user(), $child);
+
+        $request->validate([
+            'photos' => ['required', 'array', 'min:1', 'max:'.self::MAX_PHOTOS_PER_REQUEST],
+            'photos.*' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
+        ]);
+
+        $files = $request->file('photos', []);
+        if (! is_array($files)) {
+            $files = $files ? [$files] : [];
+        }
+
+        $album = $this->albumForChild($record, $request->user());
+        $startOrder = (int) $album->photos()->max('sort_order');
+        $created = [];
+        $order = $startOrder + 1;
+
+        foreach ($files as $file) {
+            if (! $file) {
+                continue;
+            }
+            $stored = $this->media->storePrivate($file, 'gallery-photos/'.$album->id);
+            $photo = GalleryPhoto::create([
+                'gallery_album_id' => $album->id,
+                'uploaded_by' => $request->user()->id,
+                'original_filename' => $file->getClientOriginalName() ?: basename($stored['path']),
+                'mime_type' => $file->getMimeType(),
+                'size_bytes' => $file->getSize() ?: 0,
+                'disk' => $stored['disk'],
+                'file_path' => $stored['path'],
+                'sort_order' => $order++,
+            ]);
+            $created[] = [
+                'id' => $photo->id,
+                'source' => 'gallery_photo',
+                'download_path' => $photo->download_path,
+                'caption' => $photo->original_filename,
+                'recorded_on' => optional($photo->created_at)?->toDateString(),
+                'created_at' => optional($photo->created_at)?->toIso8601String(),
+                'mime_type' => $photo->mime_type,
+                'original_filename' => $photo->original_filename,
+            ];
+        }
+
+        $album->touch();
+
+        return response()->json([
+            'child' => [
+                'id' => $record->id,
+                'first_name' => $record->first_name,
+                'last_name' => $record->last_name,
+            ],
+            'album' => [
+                'id' => $album->id,
+                'kind' => 'auto',
+                'child_id' => $record->id,
+                'name' => $album->name,
+            ],
+            'items' => $created,
+        ], 201);
+    }
+
     /**
      * @return Collection<int, array<string, mixed>>
      */
@@ -144,10 +216,39 @@ class ChildGalleryController extends Controller
             })
             ->values();
 
+        $gallery = GalleryPhoto::query()
+            ->whereHas('album', fn ($q) => $q->where('child_id', $childId))
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function (GalleryPhoto $photo) {
+                return [
+                    'id' => $photo->id,
+                    'source' => 'gallery_photo',
+                    'download_path' => $photo->download_path,
+                    'caption' => $photo->original_filename,
+                    'recorded_on' => optional($photo->created_at)?->toDateString(),
+                    'created_at' => optional($photo->created_at)?->toIso8601String(),
+                    'mime_type' => $photo->mime_type,
+                    'original_filename' => $photo->original_filename,
+                ];
+            });
+
         return $progress
             ->concat($documents)
+            ->concat($gallery)
             ->sortByDesc(fn (array $item) => $item['created_at'] ?? '')
             ->values();
+    }
+
+    private function albumForChild(Child $child, User $user): GalleryAlbum
+    {
+        return GalleryAlbum::firstOrCreate(
+            ['child_id' => $child->id],
+            [
+                'name' => trim($child->first_name.' '.$child->last_name).' photos',
+                'created_by' => $user->id,
+            ]
+        );
     }
 
     private function isImageDocument(ChildDocument $doc): bool

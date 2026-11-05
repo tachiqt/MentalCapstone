@@ -70,13 +70,19 @@ class EmailVerificationController extends Controller
         $mailSent = $user->trySendEmailVerificationNotification();
         $expires = (int) config('auth.verification.expire', 60);
 
-        return response()->json([
+        $payload = [
             'message' => $mailSent
                 ? 'Verification link sent. It expires in '.$expires.' minutes.'
-                : 'Email delivery failed. Use the verification link below — it expires in '.$expires.' minutes.',
+                : 'Email delivery failed. Tap Resend to try again — links expire in '.$expires.' minutes.',
             'mail_sent' => $mailSent,
-            'verification_url' => $user->emailVerificationUrl(),
+            'can_resend' => ! $mailSent,
             'expires_minutes' => $expires,
-        ], $mailSent ? 200 : 200);
+        ];
+
+        if (config('app.debug')) {
+            $payload['verification_url'] = $user->emailVerificationUrl();
+        }
+
+        return response()->json($payload);
     }
 }

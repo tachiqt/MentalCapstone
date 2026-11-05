@@ -112,6 +112,10 @@
     selectedPhotoFiles = next;
     event.target.value = '';
     renderPhotoPreviews();
+    SC.showToast?.(
+      `${incoming.length} photo${incoming.length === 1 ? '' : 's'} attached. Click “Send to parent” to upload.`,
+      'success'
+    );
   }
 
   async function openProgressUpdateModal(childId = null) {

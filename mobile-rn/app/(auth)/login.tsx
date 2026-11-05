@@ -24,10 +24,10 @@ import { Button } from '../../components/ui/Button';
 import { alpha, colors, fonts, spacing, radii, shadows, layout } from '../../lib/theme';
 
 /** The backend flags an account that exists but has not opened its invite link. */
-function unverifiedEmail(error: any): string | null {
+function unverifiedNotice(error: any): { email: string; mailSent: boolean } | null {
   const payload = error?.payload;
-  if (error?.status === 403 && payload?.reason === 'email_unverified') {
-    return payload.email || null;
+  if (error?.status === 403 && payload?.reason === 'email_unverified' && payload?.email) {
+    return { email: payload.email, mailSent: payload.mail_sent === true };
   }
   return null;
 }
@@ -40,7 +40,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   /** Set when a sign-in attempt is refused for an unverified email. */
-  const [noticeEmail, setNoticeEmail] = useState<string | null>(null);
+  const [notice, setNotice] = useState<{ email: string; mailSent: boolean } | null>(null);
 
   useEffect(() => {
     if (user?.role) router.replace(getRoleHomePath(user.role) as any);
@@ -56,9 +56,9 @@ export default function LoginScreen() {
       const loggedIn = await login(trimmed, password);
       router.replace(getRoleHomePath(loggedIn.role) as any);
     } catch (e: any) {
-      const email = unverifiedEmail(e);
-      if (email) {
-        setNoticeEmail(email);
+      const blocked = unverifiedNotice(e);
+      if (blocked) {
+        setNotice(blocked);
         return;
       }
       Alert.alert('Sign in failed', e.message || 'Unable to sign in. Check your credentials and try again.');
@@ -76,9 +76,9 @@ export default function LoginScreen() {
     } catch (e: any) {
       if (e instanceof GoogleSignInCancelled) return;
 
-      const email = unverifiedEmail(e);
-      if (email) {
-        setNoticeEmail(email);
+      const blocked = unverifiedNotice(e);
+      if (blocked) {
+        setNotice(blocked);
         return;
       }
       Alert.alert('Google sign-in failed', e.message || 'Unable to sign in with Google.');
@@ -181,9 +181,10 @@ export default function LoginScreen() {
       </SafeAreaView>
 
       <VerifyEmailNotice
-        visible={noticeEmail !== null}
-        email={noticeEmail || ''}
-        onClose={() => setNoticeEmail(null)}
+        visible={notice !== null}
+        email={notice?.email || ''}
+        justSent={notice?.mailSent === true}
+        onClose={() => setNotice(null)}
       />
     </View>
   );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '../../lib/api';
@@ -9,21 +9,36 @@ import { colors, fonts, radii, shadows, spacing } from '../../lib/theme';
 type Props = {
   visible: boolean;
   email: string;
+  /** True when login/Google already triggered a fresh verification email. */
+  justSent?: boolean;
   onClose: () => void;
 };
 
 type Status = { tone: 'idle' | 'sent' | 'error'; message: string };
 
+const SENT_COPY =
+  'Sent. Check your inbox, and your spam folder if it is not there.';
+
 /**
  * Shown when someone whose Head Doctor already invited them tries to sign in
- * before opening the verification link. The invite mail went out when the
- * account was created, so the only thing left to offer is another copy of it.
+ * before opening the verification link. Login itself sends a fresh copy; this
+ * sheet also lets them ask for another one.
  */
-export function VerifyEmailNotice({ visible, email, onClose }: Props) {
+export function VerifyEmailNotice({ visible, email, justSent = false, onClose }: Props) {
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState<Status>({ tone: 'idle', message: '' });
 
   const address = email.trim();
+
+  useEffect(() => {
+    if (!visible) {
+      setStatus({ tone: 'idle', message: '' });
+      return;
+    }
+    if (justSent) {
+      setStatus({ tone: 'sent', message: SENT_COPY });
+    }
+  }, [visible, justSent, email]);
 
   const resend = async () => {
     setSending(true);
@@ -36,9 +51,7 @@ export function VerifyEmailNotice({ visible, email, onClose }: Props) {
       if (result?.mail_sent === true) {
         setStatus({
           tone: 'sent',
-          message:
-            result.message ||
-            'Sent. Check your inbox, and your spam folder if it is not there.',
+          message: result.message || SENT_COPY,
         });
       } else {
         setStatus({
@@ -62,7 +75,6 @@ export function VerifyEmailNotice({ visible, email, onClose }: Props) {
   };
 
   const handleClose = () => {
-    setStatus({ tone: 'idle', message: '' });
     onClose();
   };
 
@@ -87,7 +99,11 @@ export function VerifyEmailNotice({ visible, email, onClose }: Props) {
 
           <Text style={styles.title}>Verify your email</Text>
 
-          <Text style={styles.body}>We already sent a verification link to</Text>
+          <Text style={styles.body}>
+            {justSent || status.tone === 'sent'
+              ? 'We sent a verification link to'
+              : 'Open the verification link sent to'}
+          </Text>
           <Text style={styles.email}>{email}</Text>
           <Text style={styles.body}>
             Open that link to activate your account, then sign in again.

@@ -58,8 +58,11 @@ export async function api<T = any>(
         ? { body: isFormData ? body : JSON.stringify(body) }
         : {}),
     });
-  } catch {
-    throw new Error('Cannot reach SmartCare server. Make sure the backend is running on port 8000.');
+  } catch (err) {
+    const detail = err instanceof Error && err.message ? ` (${err.message})` : '';
+    throw new Error(
+      `Cannot reach SmartCare at ${API_BASE_URL}${detail}. Check your network connection and that the API is online.`
+    );
   }
 
   if (!res.ok) {

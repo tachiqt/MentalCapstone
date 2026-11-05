@@ -277,13 +277,16 @@ window.SmartCareApp = window.SmartCareApp || {};
     const overlay = typeof opts?.overlay === 'string' ? SC.$(opts.overlay) : opts?.overlay;
     const sectionLoading = typeof opts?.section === 'string' ? SC.$(opts.section) : opts?.section;
     const prevDisabled = button ? button.disabled : false;
-    const prevText = button ? button.textContent : '';
+    const labelEl = button?.querySelector?.('[data-busy-text]') || null;
+    // Never assign textContent on nodes that wrap controls (e.g. <label><input type=file>).
+    const canSwapText = Boolean(opts?.busyLabel) && button && (labelEl || button.childElementCount === 0);
+    const prevText = canSwapText ? (labelEl || button).textContent : '';
     try {
       if (button) {
         button.disabled = true;
         button.setAttribute('aria-busy', 'true');
         button.classList.add('is-busy');
-        if (opts?.busyLabel) button.textContent = opts.busyLabel;
+        if (canSwapText) (labelEl || button).textContent = opts.busyLabel;
       }
       if (overlay) overlay.hidden = false;
       if (sectionLoading) sectionLoading.hidden = false;
@@ -293,7 +296,7 @@ window.SmartCareApp = window.SmartCareApp || {};
         button.disabled = prevDisabled;
         button.removeAttribute('aria-busy');
         button.classList.remove('is-busy');
-        if (opts?.busyLabel) button.textContent = prevText;
+        if (canSwapText) (labelEl || button).textContent = prevText;
       }
       if (overlay) overlay.hidden = true;
       // do not auto-hide sectionLoading — callers manage list loaders

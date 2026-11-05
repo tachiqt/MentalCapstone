@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { api } from '../../../../lib/api';
 import { childName, formatDate, initials } from '../../../../lib/format';
 import { medAdherenceRate, milestonesThisMonth } from '../../../../lib/parent-metrics';
+import { resolveChildBackTarget } from '../../../../lib/patient-navigation';
 import { Screen } from '../../../../components/ui/Screen';
 import { ScreenHeader } from '../../../../components/ui/ScreenHeader';
 import { Badge } from '../../../../components/ui/Badge';
@@ -170,6 +171,13 @@ export default function ChildProfileScreen() {
   const [tab, setTab] = useState<Tab>('progress');
   const [progressPage, setProgressPage] = useState(0);
   const [medsPage, setMedsPage] = useState(0);
+  const backHref = resolveChildBackTarget('parent');
+
+  useEffect(() => {
+    setTab('progress');
+    setProgressPage(0);
+    setMedsPage(0);
+  }, [childId]);
 
   const { data: child, isLoading: loadingChild } = useQuery({
     queryKey: ['child', childId],
@@ -229,7 +237,7 @@ export default function ChildProfileScreen() {
   if (!Number.isFinite(childId)) {
     return (
       <Screen style={styles.screen}>
-        <ScreenHeader title="Child" />
+        <ScreenHeader title="Child" fallbackHref={backHref} />
         <EmptyState title="Invalid profile" message="This child profile could not be found." icon="alert-circle-outline" />
       </Screen>
     );
@@ -237,8 +245,8 @@ export default function ChildProfileScreen() {
 
   if (loadingChild || loadingProgress || loadingMeds || loadingTherapy || loadingSchedules) {
     return (
-      <Screen style={styles.screen}>
-        <ScreenHeader title="Child profile" />
+      <Screen style={styles.screen} key={`parent-child-loading-${childId}`}>
+        <ScreenHeader title="Child profile" fallbackHref={backHref} />
         <ScrollView contentContainerStyle={styles.scroll}>
           <SkeletonCard height={160} />
           <SkeletonCard height={48} />
@@ -253,8 +261,8 @@ export default function ChildProfileScreen() {
   const monthMilestones = milestonesThisMonth(records);
 
   return (
-    <Screen style={styles.screen}>
-      <ScreenHeader title={child?.first_name || 'Child profile'} />
+    <Screen style={styles.screen} key={`parent-child-${childId}`}>
+      <ScreenHeader title={child?.first_name || 'Child profile'} fallbackHref={backHref} />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.banner}>

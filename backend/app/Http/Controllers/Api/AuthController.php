@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
@@ -119,16 +120,25 @@ class AuthController extends Controller
     /**
      * The account exists and the caller already proved they own it (correct
      * password, or a Google token for this address) — they just have not opened
-     * the verification link the Head Doctor's invite already mailed them. The
-     * `reason` code lets the mobile app show the resend screen instead of
-     * matching on prose.
+     * the verification link. Send a fresh copy now (credentials were just
+     * proven), then the mobile app opens its resend screen via `reason`.
      */
     private function unverifiedResponse(User $user): JsonResponse
     {
+        // At most one auto-send per minute per account; the sheet still offers Resend.
+        $throttleKey = 'verification-login:'.$user->id;
+        $mailSent = false;
+        if (RateLimiter::attempt($throttleKey, 1, fn () => true, 60)) {
+            $mailSent = $user->trySendEmailVerificationNotification();
+        }
+
         return response()->json([
-            'message' => 'We already sent a verification link to '.$user->email.'. Open it to activate your account, or resend it below.',
+            'message' => $mailSent
+                ? 'We sent a verification link to '.$user->email.'. Open it to activate your account, or resend it below.'
+                : 'Open the verification link sent to '.$user->email.', or tap Resend below for a new one.',
             'reason' => 'email_unverified',
             'email' => $user->email,
+            'mail_sent' => $mailSent,
             'can_resend' => true,
         ], 403);
     }
@@ -174,28 +184,33 @@ class AuthController extends Controller
         $user->save();
 
         $mailSent = false;
-        $verificationUrl = null;
         if ($emailChanged) {
             $mailSent = $user->trySendEmailVerificationNotification();
-            $verificationUrl = $user->emailVerificationUrl();
         }
 
         QueryCache::forget(QueryCache::meKey($user->id));
 
         $fresh = $user->fresh();
+        $expires = (int) config('auth.verification.expire', 15);
 
-        return response()->json([
+        $payload = [
             'user' => $fresh,
             'email_changed' => $emailChanged,
             'mail_sent' => $mailSent,
-            'verification_url' => $verificationUrl,
-            'expires_minutes' => (int) config('auth.verification.expire', 15),
+            'can_resend' => $emailChanged && ! $mailSent,
+            'expires_minutes' => $expires,
             'message' => $emailChanged
                 ? ($mailSent
-                    ? 'Profile saved. Verify your new email address — the link expires in '.(int) config('auth.verification.expire', 15).' minutes.'
-                    : 'Profile saved. Verify your new email with the link below, then sign in with Google.')
+                    ? 'Profile saved. Verify your new email address — the link expires in '.$expires.' minutes.'
+                    : 'Profile saved. The verification email could not be delivered. Use Resend on the next screen.')
                 : 'Profile saved.',
-        ]);
+        ];
+
+        if ($emailChanged && config('app.debug')) {
+            $payload['verification_url'] = $user->emailVerificationUrl();
+        }
+
+        return response()->json($payload);
     }
 
     public function uploadAvatar(Request $request, AvatarStorage $avatars): JsonResponse

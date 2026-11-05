@@ -544,10 +544,36 @@
     if (suggested.length >= 3) usernameEl.value = suggested;
   }
 
+  function showStaffFlash(message, tone = 'success') {
+    let flash = SC.$('#staff-flash');
+    const panel = SC.$('#section-staff .staff-panel') || SC.$('#section-staff');
+    if (!flash && panel) {
+      flash = document.createElement('div');
+      flash.id = 'staff-flash';
+      flash.className = 'alert';
+      flash.setAttribute('role', 'status');
+      const toolbar = panel.querySelector('.panel-toolbar');
+      if (toolbar?.nextSibling) panel.insertBefore(flash, toolbar.nextSibling);
+      else panel.prepend(flash);
+    }
+    if (!flash) return;
+    flash.className = `alert alert--${tone === 'error' ? 'error' : 'success'}`;
+    flash.textContent = message;
+    flash.hidden = false;
+    window.clearTimeout(showStaffFlash._timer);
+    showStaffFlash._timer = window.setTimeout(() => {
+      flash.hidden = true;
+    }, 8000);
+  }
+
   function errorMessage(err) {
     const errors = err?.data?.errors;
     if (errors && typeof errors === 'object') {
-      return Object.values(errors).flat().filter(Boolean).join(' ');
+      const flat = Object.values(errors).flat().filter(Boolean);
+      if (flat.some((msg) => /already registered/i.test(String(msg)))) {
+        return 'This account is already registered.';
+      }
+      return flat.join(' ');
     }
     const message = err?.message || 'Request failed.';
     if (err?.status === 500 || /server error/i.test(message)) {
@@ -646,27 +672,31 @@
         closeModal('modal-staff');
         await loadStaff({ force: true });
         if (created.mail_sent) {
-          window.alert(created.message || `Account created. Verification email sent to ${created.email}.`);
-        } else if (created.verification_url) {
-          window.alert(
-            'Account created, but the verification email could not be delivered. Copy the link in the next dialog and share it with the user.',
-          );
-          window.prompt(
-            created.message || 'Email delivery failed. Copy this verification link for the user:',
-            created.verification_url,
+          showStaffFlash(
+            created.message || `Account created. Verification email sent to ${created.email}.`,
+            'success',
           );
         } else {
-          window.alert(
-            created.message || 'Account created, but the verification email could not be sent. Ask them to use Resend verification or contact support.',
+          showStaffFlash(
+            created.message
+              || 'Account created, but the verification email could not be delivered. Open the account and use Resend verification email.',
+            'error',
           );
         }
       });
     } catch (err) {
       clearCreateFieldErrors();
       const mapped = applyServerCreateErrors(err);
+      const alreadyRegistered = Object.values(err?.data?.errors || {})
+        .flat()
+        .some((msg) => /already registered/i.test(String(msg || '')));
       showAlert(
         alertEl,
-        mapped ? 'Fix the highlighted fields before creating the account.' : errorMessage(err),
+        alreadyRegistered
+          ? 'This account is already registered.'
+          : mapped
+            ? 'Fix the highlighted fields before creating the account.'
+            : errorMessage(err),
         'error',
       );
       if (mapped) {
@@ -742,14 +772,12 @@
               result.message || `Verification email resent to ${user.email}.`,
               'success',
             );
-          } else if (result.verification_url) {
-            window.prompt(
-              result.message || 'Email delivery failed. Copy this verification link for the user:',
-              result.verification_url,
-            );
-            showAlert(alertEl, 'Email send failed — share the verification link instead.', 'error');
           } else {
-            showAlert(alertEl, result.message || 'Could not resend verification email.', 'error');
+            showAlert(
+              alertEl,
+              result.message || 'Could not resend verification email. Try again shortly.',
+              'error',
+            );
           }
           return;
         } else if (kind === 'deactivate') {

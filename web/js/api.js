@@ -6,10 +6,29 @@
   const TOKEN_KEY = 'smartcare_token';
   const API_OVERRIDE_KEY = 'SMARTCARE_API';
 
+  function isLocalApiHost(url) {
+    try {
+      const parsed = new URL(url, location.origin);
+      return /^(localhost|127\.0\.0\.1|10\.0\.2\.2)$/i.test(parsed.hostname);
+    } catch {
+      return false;
+    }
+  }
+
+  function pageIsRemote() {
+    return !/^(localhost|127\.0\.0\.1)$/i.test(location.hostname);
+  }
+
   function getBaseUrl() {
     const override = localStorage.getItem(API_OVERRIDE_KEY);
     if (override) {
-      return override.replace(/\/$/, '');
+      const cleaned = override.replace(/\/$/, '');
+      // Stale local-dev overrides break production uploads with "port" / Failed to fetch.
+      if (isLocalApiHost(cleaned) && pageIsRemote()) {
+        localStorage.removeItem(API_OVERRIDE_KEY);
+      } else {
+        return cleaned;
+      }
     }
     return `${location.origin}/api/v1`;
   }
@@ -27,7 +46,8 @@
   }
 
   async function request(path, options = {}) {
-    const url = `${getBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`;
+    const baseUrl = getBaseUrl();
+    const url = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
     const headers = {
       Accept: 'application/json',
       ...(options.body && !(options.body instanceof FormData)
@@ -41,14 +61,22 @@
       headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await fetch(url, {
-      ...options,
-      headers,
-      body:
-        options.body && typeof options.body === 'object' && !(options.body instanceof FormData)
-          ? JSON.stringify(options.body)
-          : options.body,
-    });
+    let response;
+    try {
+      response = await fetch(url, {
+        ...options,
+        headers,
+        body:
+          options.body && typeof options.body === 'object' && !(options.body instanceof FormData)
+            ? JSON.stringify(options.body)
+            : options.body,
+      });
+    } catch (err) {
+      const detail = err && err.message ? ` (${err.message})` : '';
+      throw new Error(
+        `Cannot reach SmartCare at ${baseUrl}${detail}. Check your network connection and that the API is online.`
+      );
+    }
 
     let data = null;
     const contentType = response.headers.get('content-type') || '';

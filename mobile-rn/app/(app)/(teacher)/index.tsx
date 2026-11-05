@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,6 +27,16 @@ type Recommendation = { id: number };
 export default function TeacherHome() {
   const { user } = useAuth();
   const router = useRouter();
+  const openingChildRef = useRef(false);
+
+  const openChild = (id: number) => {
+    if (openingChildRef.current) return;
+    openingChildRef.current = true;
+    router.push(`/(app)/(teacher)/child/${id}`);
+    setTimeout(() => {
+      openingChildRef.current = false;
+    }, 600);
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['children'],
@@ -114,7 +125,7 @@ export default function TeacherHome() {
             <TouchableOpacity
               style={styles.card}
               activeOpacity={0.85}
-              onPress={() => router.push(`/(app)/(teacher)/child/${item.id}`)}
+              onPress={() => openChild(item.id)}
               accessibilityRole="button"
               accessibilityLabel={`Open ${name}`}
             >

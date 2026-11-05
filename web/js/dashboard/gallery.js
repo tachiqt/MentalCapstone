@@ -188,7 +188,11 @@
     activeAlbumName = name || '';
     activePage = page;
     setAlbumsVisible(false);
-    if (customActions) customActions.hidden = kind !== 'custom';
+    if (customActions) customActions.hidden = false;
+    const renameBtn = SC.$('#gallery-rename-btn');
+    const deleteBtn = SC.$('#gallery-delete-btn');
+    if (renameBtn) renameBtn.hidden = kind !== 'custom';
+    if (deleteBtn) deleteBtn.hidden = kind !== 'custom';
     if (loading) loading.hidden = false;
     if (empty) empty.hidden = true;
     grid.innerHTML = '';
@@ -228,7 +232,9 @@
       if (panelTitle) panelTitle.textContent = displayName;
       if (panelHint) {
         panelHint.textContent =
-          kind === 'custom' ? 'Upload and browse photos in this album.' : 'Browse photos in this album.';
+          kind === 'custom'
+            ? 'Upload and browse photos in this album.'
+            : 'Upload photos for this child, or browse progress and document images.';
       }
 
       if (!items.length) {
@@ -237,7 +243,7 @@
           empty.textContent =
             kind === 'custom'
               ? 'No photos in this album yet. Use Upload photos to add images.'
-              : 'No photos in this album yet.';
+              : 'No photos yet. Use Upload photos to add images for this child.';
         }
         return;
       }
@@ -335,28 +341,72 @@
       else if (activeKind === 'auto' && activeChildId) openAutoAlbum(activeChildId, next);
     });
 
+    SC.$('#gallery-upload-btn')?.addEventListener('click', () => {
+      if (activeKind === 'custom' && activeAlbumId) {
+        SC.$('#gallery-upload-input')?.click();
+        return;
+      }
+      if (activeKind === 'auto' && activeChildId) {
+        SC.$('#gallery-upload-input')?.click();
+        return;
+      }
+      SC.showToast?.('Open a child or facility album before uploading photos.');
+    });
+
     SC.$('#gallery-upload-input')?.addEventListener('change', async (e) => {
       const input = e.target;
       const files = Array.from(input.files || []);
       input.value = '';
-      if (!files.length || !activeAlbumId) return;
-      if (files.length > 12) {
-        SC.showToast?.('You can upload up to 12 photos at a time.', 'error');
+      if (!files.length) return;
+
+      const isCustom = activeKind === 'custom' && activeAlbumId;
+      const isChild = activeKind === 'auto' && activeChildId;
+      if (!isCustom && !isChild) {
+        SC.showToast?.('Open a child or facility album before uploading photos.');
         return;
       }
+      if (files.length > 12) {
+        SC.showToast?.('You can upload up to 12 photos at a time.');
+        return;
+      }
+      const maxBytes = 5 * 1024 * 1024;
+      for (const file of files) {
+        const okType =
+          /^image\/(jpeg|jpg|png)$/i.test(file.type) || /\.(jpe?g|png)$/i.test(file.name);
+        if (!okType) {
+          SC.showToast?.(`“${file.name}” must be JPG or PNG.`);
+          return;
+        }
+        if (file.size > maxBytes) {
+          SC.showToast?.(`“${file.name}” exceeds the 5 MB limit.`);
+          return;
+        }
+      }
+
+      const albumId = activeAlbumId;
+      const albumName = activeAlbumName;
+      const childId = activeChildId;
+      const kind = activeKind;
+      const endpoint = isCustom
+        ? `/gallery/custom-albums/${albumId}/photos`
+        : `/gallery/albums/${childId}/photos`;
       const body = new FormData();
       files.forEach((file) => body.append('photos[]', file));
       try {
-        await SC.withBusy?.(
-          { button: SC.$('#gallery-custom-actions label'), busyLabel: 'Uploading…' },
+        await SC.withBusy(
+          { button: SC.$('#gallery-upload-btn'), busyLabel: 'Uploading…' },
           async () => {
-            await SmartCareAPI.post(`/gallery/custom-albums/${activeAlbumId}/photos`, body);
+            await SmartCareAPI.post(endpoint, body);
           }
         );
-        SC.showToast?.('Photos uploaded.', 'success');
-        await openCustomAlbum(activeAlbumId, activeAlbumName, 1);
+        SC.showToast?.(`${files.length} photo${files.length === 1 ? '' : 's'} uploaded.`);
+        if (kind === 'custom') await openCustomAlbum(albumId, albumName, 1);
+        else await openAutoAlbum(childId, 1);
       } catch (err) {
-        SC.showToast?.(err.message || 'Could not upload photos.', 'error');
+        const details = err?.data?.errors
+          ? Object.values(err.data.errors).flat().join(' ')
+          : '';
+        SC.showToast?.(details || err.message || 'Could not upload photos.');
       }
     });
 

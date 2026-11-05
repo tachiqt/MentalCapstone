@@ -25,7 +25,8 @@ return [
     ],
 
     'resend' => [
-        'key' => env('RESEND_KEY'),
+        // Prefer RESEND_KEY; accept RESEND_API_KEY for Resend dashboard / Laravel Cloud naming.
+        'key' => env('RESEND_KEY', env('RESEND_API_KEY')),
     ],
 
     'slack' => [

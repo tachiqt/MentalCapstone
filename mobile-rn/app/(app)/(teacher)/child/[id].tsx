@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Image,
   Modal,
@@ -14,9 +14,11 @@ import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { File } from 'expo-file-system';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { api } from '../../../../lib/api';
 import { childName, formatDate, initials } from '../../../../lib/format';
+import { resolveChildBackTarget } from '../../../../lib/patient-navigation';
 import { Screen } from '../../../../components/ui/Screen';
 import { ScreenHeader } from '../../../../components/ui/ScreenHeader';
 import { Badge } from '../../../../components/ui/Badge';
@@ -111,6 +113,25 @@ export default function TeacherChildDetailScreen() {
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [libraryQuery, setLibraryQuery] = useState('');
 
+  useEffect(() => {
+    setTab('progress');
+    setComposerOpen(false);
+    setTitle('');
+    setSummary('');
+    setMilestone('');
+    setDraftPhotos([]);
+    setPlanComposerOpen(false);
+    setEditingPlanId(null);
+    setPlanTitle('');
+    setPlanDescription('');
+    setPlanSessions('2');
+    setPlanStatus('active');
+    setMaterialsEditing(false);
+    setDraftMaterialIds([]);
+    setLibraryOpen(false);
+    setLibraryQuery('');
+  }, [childId]);
+
   const { data: child, isLoading: loadingChild } = useQuery({
     queryKey: ['child', childId],
     queryFn: () => api<ChildDetail>(`/children/${childId}`),
@@ -158,16 +179,14 @@ export default function TeacherChildDetailScreen() {
           },
         });
       }
+      // Expo SDK 57's WinterCG fetch rejects RN `{ uri, name, type }` parts with
+      // "Unsupported FormDataPart implementation". expo-file-system File is a Blob.
       const body = new FormData();
       body.append('title', payload.title);
       if (payload.summary) body.append('summary', payload.summary);
       if (payload.milestone) body.append('milestone', payload.milestone);
-      payload.photos.forEach((photo, index) => {
-        body.append('photos[]', {
-          uri: photo.uri,
-          name: photo.name || `photo-${index + 1}.jpg`,
-          type: photo.type || 'image/jpeg',
-        } as any);
+      payload.photos.forEach((photo) => {
+        body.append('photos[]', new File(photo.uri));
       });
       return api(`/children/${childId}/progress`, { method: 'POST', body });
     },
@@ -200,6 +219,8 @@ export default function TeacherChildDetailScreen() {
       allowsMultipleSelection: true,
       selectionLimit: remaining,
       quality: 0.85,
+      // Ensure file:// URIs so multipart upload works on Android (content:// fails).
+      copyToCacheDirectory: true,
     });
     if (result.canceled) return;
     const next: DraftPhoto[] = [];
@@ -366,10 +387,13 @@ export default function TeacherChildDetailScreen() {
     syncMaterials.mutate(Array.from(new Set(draftMaterialIds)));
   };
 
+  const backHref = resolveChildBackTarget('teacher');
+
   if (loadingChild) {
     return (
-      <Screen style={styles.screen}>
+      <Screen style={styles.screen} key={`child-loading-${childId}`}>
         <Stack.Screen options={{ title: 'Child' }} />
+        <ScreenHeader title="Patient profile" fallbackHref={backHref} />
         <View style={styles.pad}>
           <SkeletonCard height={72} />
           <SkeletonCard height={120} />
@@ -380,18 +404,19 @@ export default function TeacherChildDetailScreen() {
 
   if (!child) {
     return (
-      <Screen style={styles.screen}>
+      <Screen style={styles.screen} key={`child-missing-${childId}`}>
         <Stack.Screen options={{ title: 'Child' }} />
+        <ScreenHeader title="Patient profile" fallbackHref={backHref} />
         <EmptyState title="Child not found" message="This profile is not available." icon="person-outline" />
       </Screen>
     );
   }
 
   return (
-    <Screen style={styles.screen}>
+    <Screen style={styles.screen} key={`child-${childId}`}>
       <Stack.Screen options={{ title: name, headerShown: false }} />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <ScreenHeader title="Patient profile" />
+        <ScreenHeader title="Patient profile" fallbackHref={backHref} />
 
         <View style={styles.hero}>
           <View style={styles.heroTop}>
@@ -538,8 +563,12 @@ export default function TeacherChildDetailScreen() {
                 return (
                   <View key={plan.id} style={styles.card}>
                     <View style={styles.planHead}>
-                      <Text style={styles.cardTitle}>{plan.title || `Plan #${plan.id}`}</Text>
-                      <Badge label={archived ? 'Archived' : 'Active'} tone={archived ? 'neutral' : 'success'} />
+                      <Text style={styles.planTitle} numberOfLines={2}>
+                        {plan.title || `Plan #${plan.id}`}
+                      </Text>
+                      <View style={styles.planBadge}>
+                        <Badge label={archived ? 'Archived' : 'Active'} tone={archived ? 'neutral' : 'success'} />
+                      </View>
                     </View>
                     {plan.description ? <Text style={styles.cardBody}>{plan.description}</Text> : null}
                     <Text style={styles.planMeta}>
@@ -1053,12 +1082,32 @@ const styles = StyleSheet.create({
     borderColor: alpha.a08,
     ...shadows.sm,
   },
-  cardTitle: { fontFamily: fonts.headingSemi, fontSize: 16, color: colors.green900 },
-  cardBody: { fontFamily: fonts.body, fontSize: 14, color: colors.textSecondary, lineHeight: 21 },
-  planHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
+  cardTitle: { fontFamily: fonts.headingSemi, fontSize: 16, color: colors.green900, flex: 1, minWidth: 0 },
+  cardBody: { fontFamily: fonts.body, fontSize: 14, color: colors.textSecondary, lineHeight: 21, flexShrink: 1 },
+  planHead: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  planTitle: {
+    flex: 1,
+    minWidth: 0,
+    fontFamily: fonts.headingSemi,
+    fontSize: 16,
+    color: colors.green900,
+    lineHeight: 22,
+  },
+  planBadge: { flexShrink: 0, paddingTop: 2 },
   planMeta: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.primary },
-  planActions: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.sm },
-  planActionBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  planActions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md, marginTop: spacing.sm },
+  planActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 44,
+    paddingHorizontal: spacing.sm,
+  },
   planActionText: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.primary },
   editBar: { gap: spacing.md },
   libraryBtn: {
@@ -1074,7 +1123,7 @@ const styles = StyleSheet.create({
   },
   libraryBtnText: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.primary },
   editActions: { flexDirection: 'row', gap: spacing.md },
-  materialHead: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
+  materialHead: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, minWidth: 0 },
   removeBtn: { padding: 2, marginTop: 2 },
   librarySheet: { gap: spacing.sm },
   libraryList: { maxHeight: 360, marginTop: spacing.sm },

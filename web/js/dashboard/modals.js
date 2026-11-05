@@ -37,9 +37,23 @@
     SC.$$('[data-close-modal]').forEach((btn) => {
       btn.addEventListener('click', () => btn.closest('dialog')?.close());
     });
+
+    // Backdrop close must require a real press on the backdrop.
+    // After a native file picker closes, browsers often synthesize a click on
+    // whatever is under the cursor (frequently the <dialog> backdrop), which
+    // used to dismiss child-profile / progress / document modals before upload.
     SC.$$('dialog.modal').forEach((d) => {
+      let backdropArmed = false;
+      d.addEventListener('pointerdown', (e) => {
+        backdropArmed = e.target === d;
+      });
       d.addEventListener('click', (e) => {
-        if (e.target === d) d.close();
+        if (e.target !== d || !backdropArmed) {
+          backdropArmed = false;
+          return;
+        }
+        backdropArmed = false;
+        d.close();
       });
     });
   }

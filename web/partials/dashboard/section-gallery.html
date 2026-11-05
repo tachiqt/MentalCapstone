@@ -34,10 +34,10 @@
                   <p id="gallery-album-subtitle" class="profile-item__meta"></p>
                 </div>
                 <div class="gallery-album-toolbar__actions" id="gallery-custom-actions" hidden>
-                  <label class="btn btn-primary btn-sm">
-                    Upload photos
-                    <input type="file" id="gallery-upload-input" hidden accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple>
-                  </label>
+                  <button type="button" class="btn btn-primary btn-sm" id="gallery-upload-btn">
+                    <span data-busy-text>Upload photos</span>
+                  </button>
+                  <input type="file" id="gallery-upload-input" hidden accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple>
                   <button type="button" class="btn btn-secondary btn-sm" id="gallery-rename-btn">Rename</button>
                   <button type="button" class="btn btn-secondary btn-sm" id="gallery-delete-btn">Delete album</button>
                 </div>

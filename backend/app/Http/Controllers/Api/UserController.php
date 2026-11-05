@@ -55,6 +55,8 @@ class UserController extends Controller
         ], [
             'password.regex' => 'Password must include at least one letter and one number.',
             'username.regex' => 'Username may only contain letters, numbers, dots, hyphens, and underscores (no spaces or @).',
+            'email.unique' => 'This account is already registered.',
+            'username.unique' => 'This account is already registered.',
         ]);
 
         [$user, $restored] = $this->resolveStaffAccount($data);
@@ -72,8 +74,7 @@ class UserController extends Controller
 
         $createdWord = $restored ? 'restored' : 'created';
 
-        // Always give Head Doctor a shareable link; email may fail if SMTP credentials are invalid.
-        return response()->json([
+        $payload = [
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
@@ -83,11 +84,17 @@ class UserController extends Controller
             'email_verified_at' => $user->email_verified_at,
             'created_at' => $user->created_at,
             'mail_sent' => $mailSent,
-            'verification_url' => $user->emailVerificationUrl(),
+            'can_resend' => ! $mailSent,
             'message' => $mailSent
                 ? 'Account '.$createdWord.'. A verification email was sent to '.$user->email.'.'
-                : 'Account '.$createdWord.', but email delivery failed. Share the verification link with the user.',
-        ], 201);
+                : 'Account '.$createdWord.', but the verification email could not be delivered. Open the account and use Resend verification email.',
+        ];
+
+        if (config('app.debug')) {
+            $payload['verification_url'] = $user->emailVerificationUrl();
+        }
+
+        return response()->json($payload, 201);
     }
 
     /**
@@ -114,7 +121,8 @@ class UserController extends Controller
         if ($existing) {
             if (! $existing->trashed()) {
                 throw ValidationException::withMessages([
-                    'email' => 'An account with this email or username already exists.',
+                    'email' => 'This account is already registered.',
+                    'username' => 'This account is already registered.',
                 ]);
             }
 
@@ -161,13 +169,19 @@ class UserController extends Controller
 
         QueryCache::forget(QueryCache::USERS);
 
-        return response()->json([
+        $payload = [
             'message' => $mailSent
                 ? 'Verification email sent to '.$user->email.'.'
-                : 'Email delivery failed. Share this verification link with the user.',
+                : 'Email delivery failed. Try Resend verification email again shortly.',
             'mail_sent' => $mailSent,
-            'verification_url' => $user->emailVerificationUrl(),
-        ]);
+            'can_resend' => ! $mailSent,
+        ];
+
+        if (config('app.debug')) {
+            $payload['verification_url'] = $user->emailVerificationUrl();
+        }
+
+        return response()->json($payload);
     }
 
     public function show(User $user): JsonResponse

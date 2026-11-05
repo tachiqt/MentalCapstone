@@ -142,6 +142,43 @@ class ChildGalleryTest extends TestCase
             ->assertJsonCount(2, 'items');
     }
 
+    public function test_child_album_upload_appears_in_auto_gallery(): void
+    {
+        Sanctum::actingAs($this->headDoctor);
+
+        $upload = $this->post("/api/v1/gallery/albums/{$this->child->id}/photos", [
+            'photos' => [
+                UploadedFile::fake()->image('child-one.jpg', 120, 120),
+                UploadedFile::fake()->image('child-two.png', 100, 100),
+            ],
+        ], ['Accept' => 'application/json'])
+            ->assertCreated()
+            ->assertJsonPath('album.child_id', $this->child->id)
+            ->assertJsonCount(2, 'items');
+
+        $this->assertDatabaseHas('gallery_albums', [
+            'child_id' => $this->child->id,
+        ]);
+
+        $this->getJson("/api/v1/gallery/albums/{$this->child->id}")
+            ->assertOk()
+            ->assertJsonPath('meta.total', 2)
+            ->assertJsonCount(2, 'items');
+
+        $albums = collect($this->getJson('/api/v1/gallery/albums')->assertOk()->json());
+        $auto = $albums->first(
+            fn ($row) => ($row['kind'] ?? '') === 'auto' && (int) $row['child_id'] === $this->child->id
+        );
+        $this->assertNotNull($auto);
+        $this->assertSame(2, $auto['photo_count']);
+        $this->assertFalse(
+            $albums->contains(fn ($row) => ($row['kind'] ?? '') === 'custom' && isset($row['child_id']))
+        );
+
+        $photoId = $upload->json('items.0.id');
+        $this->get("/api/v1/gallery-photos/{$photoId}/file")->assertOk();
+    }
+
     public function test_facility_album_crud_upload_and_stream(): void
     {
         Sanctum::actingAs($this->headDoctor);

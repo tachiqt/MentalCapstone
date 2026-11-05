@@ -11,12 +11,31 @@ type Props = {
   title?: string;
   /** Trailing control, e.g. a "Mark all read" action. */
   action?: ReactNode;
+  /** Custom back handler. Prefer this for patient profiles. */
+  onBack?: () => void;
+  /** When set and onBack is omitted, navigate here instead of router.back(). */
+  fallbackHref?: string;
 };
 
-export function ScreenHeader({ title, action }: Props) {
+export function ScreenHeader({ title, action, onBack, fallbackHref }: Props) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const hasTitle = Boolean(title?.trim());
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+      return;
+    }
+    if (fallbackHref) {
+      router.navigate(fallbackHref as any);
+      return;
+    }
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+  };
 
   return (
     <LinearGradient
@@ -25,7 +44,7 @@ export function ScreenHeader({ title, action }: Props) {
     >
       <TouchableOpacity
         style={styles.backBtn}
-        onPress={() => router.back()}
+        onPress={handleBack}
         accessibilityRole="button"
         accessibilityLabel="Go back"
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}

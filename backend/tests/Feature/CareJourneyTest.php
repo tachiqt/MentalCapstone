@@ -7,6 +7,7 @@ use App\Models\AssessmentChecklist;
 use App\Models\Child;
 use App\Models\Notification;
 use App\Models\User;
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
@@ -101,12 +102,13 @@ class CareJourneyTest extends TestCase
     }
 
     /**
-     * The mobile app shows a "we already sent your link" screen with a single
-     * resend button, so the refusal has to be machine-readable rather than only
-     * a sentence.
+     * The mobile app opens the verify/resend sheet from `reason`, and login
+     * itself sends a fresh verification link once credentials are proven.
      */
     public function test_first_sign_in_before_verifying_explains_the_link_was_already_sent(): void
     {
+        NotificationFacade::fake();
+
         $invited = User::factory()->unverified()->create([
             'username' => 'invited_caretaker',
             'email' => 'invited.caretaker@example.com',
@@ -122,7 +124,10 @@ class CareJourneyTest extends TestCase
             ->assertStatus(403)
             ->assertJsonPath('reason', 'email_unverified')
             ->assertJsonPath('email', $invited->email)
+            ->assertJsonPath('mail_sent', true)
             ->assertJsonPath('can_resend', true);
+
+        NotificationFacade::assertSentTo($invited, VerifyEmailNotification::class);
     }
 
     public function test_the_invited_user_can_resend_their_own_verification_link(): void

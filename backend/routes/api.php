@@ -68,7 +68,8 @@ Route::prefix('v1')->group(function () {
             Route::get('users/{user}', [UserController::class, 'show']);
             Route::put('users/{user}', [UserController::class, 'update']);
             Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword']);
-            Route::post('users/{user}/resend-verification', [UserController::class, 'resendVerification']);
+            Route::post('users/{user}/resend-verification', [UserController::class, 'resendVerification'])
+                ->middleware('throttle:5,1');
             Route::patch('users/{user}/deactivate', [UserController::class, 'deactivate']);
             Route::delete('users/{user}', [UserController::class, 'destroy']);
             Route::get('activity-logs', [ActivityLogController::class, 'index']);
@@ -115,6 +116,7 @@ Route::prefix('v1')->group(function () {
 
             Route::get('gallery/albums', [ChildGalleryController::class, 'albums']);
             Route::get('gallery/albums/{child}', [ChildGalleryController::class, 'show'])->whereNumber('child');
+            Route::post('gallery/albums/{child}/photos', [ChildGalleryController::class, 'uploadPhotos'])->whereNumber('child');
 
             Route::post('gallery/custom-albums', [GalleryAlbumController::class, 'store']);
             Route::patch('gallery/custom-albums/{album}', [GalleryAlbumController::class, 'update']);
