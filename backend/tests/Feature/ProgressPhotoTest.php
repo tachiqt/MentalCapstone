@@ -93,8 +93,8 @@ class ProgressPhotoTest extends TestCase
             'title' => 'Art activity',
             'summary' => 'Finished a painting',
             'photos' => [
-                UploadedFile::fake()->image('art1.jpg', 400, 400),
-                UploadedFile::fake()->image('art2.png', 400, 400),
+                UploadedFile::fake()->create('art1.jpg', 100, 'image/jpeg'),
+                UploadedFile::fake()->create('art2.png', 100, 'image/png'),
             ],
         ], ['Accept' => 'application/json']);
 
@@ -116,7 +116,7 @@ class ProgressPhotoTest extends TestCase
         Sanctum::actingAs($this->teacher);
         $created = $this->post("/api/v1/children/{$this->child->id}/progress", [
             'title' => 'Private moment',
-            'photos' => [UploadedFile::fake()->image('secret.jpg', 200, 200)],
+            'photos' => [UploadedFile::fake()->create('secret.jpg', 40, 'image/jpeg')],
         ], ['Accept' => 'application/json'])->assertCreated();
 
         $photoId = $created->json('photos.0.id');
@@ -132,7 +132,7 @@ class ProgressPhotoTest extends TestCase
 
         $photos = [];
         for ($i = 0; $i < 7; $i++) {
-            $photos[] = UploadedFile::fake()->image("p{$i}.jpg", 100, 100);
+            $photos[] = UploadedFile::fake()->create("p{$i}.jpg", 20, 'image/jpeg');
         }
 
         $this->post("/api/v1/children/{$this->child->id}/progress", [
@@ -142,7 +142,7 @@ class ProgressPhotoTest extends TestCase
 
         $this->post("/api/v1/children/{$this->child->id}/progress", [
             'title' => 'Too big',
-            'photos' => [UploadedFile::fake()->image('big.jpg')->size(6000)],
+            'photos' => [UploadedFile::fake()->create('big.jpg', 6000, 'image/jpeg')],
         ], ['Accept' => 'application/json'])->assertStatus(422);
     }
 
@@ -153,8 +153,8 @@ class ProgressPhotoTest extends TestCase
         $created = $this->post("/api/v1/children/{$this->child->id}/progress", [
             'title' => 'Session recap',
             'photos' => [
-                UploadedFile::fake()->image('a.jpg', 200, 200),
-                UploadedFile::fake()->image('b.jpg', 200, 200),
+                UploadedFile::fake()->create('a.jpg', 40, 'image/jpeg'),
+                UploadedFile::fake()->create('b.jpg', 40, 'image/jpeg'),
             ],
         ], ['Accept' => 'application/json'])->assertCreated();
 
@@ -165,7 +165,7 @@ class ProgressPhotoTest extends TestCase
         $updated = $this->post("/api/v1/children/{$this->child->id}/progress/{$recordId}", [
             'title' => 'Session recap (edited)',
             'remove_photo_ids' => [$removeId],
-            'photos' => [UploadedFile::fake()->image('c.jpg', 200, 200)],
+            'photos' => [UploadedFile::fake()->create('c.jpg', 40, 'image/jpeg')],
         ], ['Accept' => 'application/json']);
 
         $updated->assertOk()

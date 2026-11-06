@@ -86,7 +86,7 @@ class ChildDocumentTest extends TestCase
     public function test_parent_cannot_access_documents(): void
     {
         Sanctum::actingAs($this->headDoctor);
-        $file = UploadedFile::fake()->image('pwd.jpg', 300, 300);
+        $file = UploadedFile::fake()->create('pwd.jpg', 100, 'image/jpeg');
         $created = $this->post("/api/v1/children/{$this->child->id}/documents", [
             'category' => 'pwd_id',
             'file' => $file,
@@ -98,7 +98,7 @@ class ChildDocumentTest extends TestCase
         $this->get("/api/v1/children/{$this->child->id}/documents/{$created->json('id')}/file")->assertForbidden();
         $this->post("/api/v1/children/{$this->child->id}/documents", [
             'category' => 'other',
-            'file' => UploadedFile::fake()->image('x.jpg'),
+            'file' => UploadedFile::fake()->create('x.jpg', 10, 'image/jpeg'),
         ], ['Accept' => 'application/json'])->assertForbidden();
     }
 
@@ -123,7 +123,7 @@ class ChildDocumentTest extends TestCase
 
         $created = $this->post("/api/v1/children/{$this->child->id}/documents", [
             'category' => 'other',
-            'file' => UploadedFile::fake()->image('old.png', 200, 200),
+            'file' => UploadedFile::fake()->create('old.png', 40, 'image/png'),
         ], ['Accept' => 'application/json'])->assertCreated();
 
         $oldPath = $created->json('file_path');

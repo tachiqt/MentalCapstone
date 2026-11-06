@@ -7,6 +7,7 @@ use App\Models\AiRecommendation;
 use App\Models\LearningMaterial;
 use App\Models\MedicationSchedule;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
@@ -74,7 +75,7 @@ class RoleOperationalSustainabilityTest extends TestCase
         ])->assertOk()
             ->assertJsonPath('facility_name', 'Malvar Assisted Facility');
 
-        $when = now()->addDay()->setTime(10, 0)->toIso8601String();
+        $when = Carbon::now('Asia/Manila')->addDay()->setTime(10, 0)->utc()->toIso8601String();
         Sanctum::actingAs($this->teacher);
         $this->postJson('/api/v1/therapy-sessions', [
             'child_id' => $this->child->id,
@@ -187,7 +188,7 @@ class RoleOperationalSustainabilityTest extends TestCase
         ])->assertOk()
             ->assertJsonPath('status', 'approved');
 
-        $when = now()->addDays(2)->setTime(14, 0)->toIso8601String();
+        $when = Carbon::now('Asia/Manila')->addDays(2)->setTime(14, 0)->utc()->toIso8601String();
         $this->postJson('/api/v1/therapy-sessions', [
             'child_id' => $this->child->id,
             'teacher_id' => $this->teacher->id,

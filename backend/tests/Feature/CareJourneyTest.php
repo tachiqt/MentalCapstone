@@ -8,6 +8,7 @@ use App\Models\Child;
 use App\Models\Notification;
 use App\Models\User;
 use App\Notifications\VerifyEmailNotification;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
@@ -365,10 +366,11 @@ class CareJourneyTest extends TestCase
     {
         Sanctum::actingAs($this->teacher);
 
+        $when = Carbon::now('Asia/Manila')->addDay()->setTime(10, 0)->utc()->toIso8601String();
         $session = $this->postJson('/api/v1/therapy-sessions', [
             'child_id' => $this->child->id,
             'teacher_id' => $this->teacher->id,
-            'scheduled_at' => now()->addDay()->toIso8601String(),
+            'scheduled_at' => $when,
             'duration_minutes' => 45,
         ])->assertCreated()->json();
 

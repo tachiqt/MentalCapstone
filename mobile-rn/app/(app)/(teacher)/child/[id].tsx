@@ -219,8 +219,6 @@ export default function TeacherChildDetailScreen() {
       allowsMultipleSelection: true,
       selectionLimit: remaining,
       quality: 0.85,
-      // Ensure file:// URIs so multipart upload works on Android (content:// fails).
-      copyToCacheDirectory: true,
     });
     if (result.canceled) return;
     const next: DraftPhoto[] = [];

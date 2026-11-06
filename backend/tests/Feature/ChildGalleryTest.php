@@ -69,7 +69,7 @@ class ChildGalleryTest extends TestCase
 
         for ($i = 0; $i < 21; $i++) {
             $stored = app(MediaStorage::class)->storePrivate(
-                UploadedFile::fake()->image("p{$i}.jpg", 80, 80),
+                UploadedFile::fake()->create("p{$i}.jpg", 10, 'image/jpeg'),
                 'progress-photos/'.$record->id
             );
             ProgressPhoto::create([
@@ -100,7 +100,7 @@ class ChildGalleryTest extends TestCase
         ]);
 
         $imgStored = app(MediaStorage::class)->storePrivate(
-            UploadedFile::fake()->image('pwd.png', 100, 100),
+            UploadedFile::fake()->create('pwd.png', 20, 'image/png'),
             'child-documents/'.$this->child->id
         );
         ChildDocument::create([
@@ -148,8 +148,8 @@ class ChildGalleryTest extends TestCase
 
         $upload = $this->post("/api/v1/gallery/albums/{$this->child->id}/photos", [
             'photos' => [
-                UploadedFile::fake()->image('child-one.jpg', 120, 120),
-                UploadedFile::fake()->image('child-two.png', 100, 100),
+                UploadedFile::fake()->create('child-one.jpg', 20, 'image/jpeg'),
+                UploadedFile::fake()->create('child-two.png', 20, 'image/png'),
             ],
         ], ['Accept' => 'application/json'])
             ->assertCreated()
@@ -207,8 +207,8 @@ class ChildGalleryTest extends TestCase
 
         $upload = $this->post("/api/v1/gallery/custom-albums/{$albumId}/photos", [
             'photos' => [
-                UploadedFile::fake()->image('one.jpg', 120, 120),
-                UploadedFile::fake()->image('two.png', 100, 100),
+                UploadedFile::fake()->create('one.jpg', 20, 'image/jpeg'),
+                UploadedFile::fake()->create('two.png', 20, 'image/png'),
             ],
         ], ['Accept' => 'application/json'])
             ->assertCreated()

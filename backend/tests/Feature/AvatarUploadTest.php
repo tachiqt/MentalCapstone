@@ -30,7 +30,7 @@ class AvatarUploadTest extends TestCase
         Sanctum::actingAs($user);
 
         $response = $this->post('/api/v1/me/avatar', [
-            'photo' => UploadedFile::fake()->image('doctor.jpg', 400, 400),
+            'photo' => UploadedFile::fake()->create('doctor.jpg', 100, 'image/jpeg'),
         ]);
 
         $response->assertOk()
@@ -58,7 +58,7 @@ class AvatarUploadTest extends TestCase
         Sanctum::actingAs($user);
 
         $this->post('/api/v1/me/avatar', [
-            'photo' => UploadedFile::fake()->image('parent.jpg', 400, 400),
+            'photo' => UploadedFile::fake()->create('parent.jpg', 100, 'image/jpeg'),
         ])->assertForbidden();
     }
 }
