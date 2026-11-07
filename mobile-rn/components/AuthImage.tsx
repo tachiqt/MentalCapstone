@@ -1,7 +1,17 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ImageStyle, StyleProp, View, StyleSheet } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  ImageStyle,
+  Modal,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { apiUrl, getToken } from '../lib/api';
-import { colors, radii } from '../lib/theme';
+import { colors, radii, spacing } from '../lib/theme';
 
 type Props = {
   path: string;
@@ -48,10 +58,12 @@ async function toDataUri(blob: Blob): Promise<string> {
 
 /**
  * Loads a private API file (Bearer) into a data URI for Image display.
+ * Tap opens a full-screen lightbox (same idea as the web gallery).
  */
 export function AuthImage({ path, style }: Props) {
   const [uri, setUri] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -91,7 +103,34 @@ export function AuthImage({ path, style }: Props) {
     );
   }
 
-  return <Image source={{ uri }} style={style} resizeMode="cover" />;
+  return (
+    <>
+      <Pressable
+        onPress={() => setOpen(true)}
+        accessibilityRole="imagebutton"
+        accessibilityLabel="View photo full screen"
+        style={[styles.thumbWrap, style as object]}
+      >
+        <Image source={{ uri }} style={styles.thumbImage} resizeMode="cover" />
+      </Pressable>
+
+      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+        <View style={styles.lightbox}>
+          <Pressable
+            onPress={() => setOpen(false)}
+            accessibilityRole="button"
+            accessibilityLabel="Close photo"
+            style={styles.closeBtn}
+          >
+            <Ionicons name="close" size={22} color="#FFFFFF" />
+          </Pressable>
+          <Pressable style={styles.lightboxBody} onPress={() => setOpen(false)}>
+            <Image source={{ uri }} style={styles.lightboxImage} resizeMode="contain" />
+          </Pressable>
+        </View>
+      </Modal>
+    </>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -101,5 +140,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+  },
+  thumbWrap: {
+    overflow: 'hidden',
+  },
+  thumbImage: {
+    width: '100%',
+    height: '100%',
+  },
+  lightbox: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.92)',
+    justifyContent: 'center',
+  },
+  lightboxBody: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  lightboxImage: {
+    width: '100%',
+    height: '100%',
+  },
+  closeBtn: {
+    position: 'absolute',
+    top: spacing.xxxl,
+    right: spacing.lg,
+    zIndex: 2,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
